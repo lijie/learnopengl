@@ -6,6 +6,8 @@
 #include <math.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
 #include "context.h"
@@ -13,8 +15,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-static const char * vertex_shader_path = "../texture/vertex.glsl";
-static const char * fragment_shader_path = "../texture/fragment.glsl";
+static const char * vertex_shader_path = "../transformation/vertex.glsl";
+static const char * fragment_shader_path = "../transformation/fragment.glsl";
 
 static int screen_width = 800;
 static int screen_height = 600;
@@ -58,8 +60,19 @@ static void process_input(GLFWwindow *window)
 
 static void draw(GlContext *c)
 {
+    glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, c->texture_ids[0]);
-        c->shader->Use();
+	// c->shader->SetUniformValues
+
+	glm::mat4 trans = glm::mat4(1.0);
+	trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0, 0, 1));
+	// trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+    c->shader->Use();
+
+    unsigned int transformLoc = c->shader->GetUniformLocation("transform");//glGetUniformLocation(c->shader->, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
 	glBindVertexArray(c->vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -180,7 +193,7 @@ static void load_texture(GlContext *c, struct image_data *in)
 	c->texture_ids[0] = texture_id;
 
 	// glUniform1i(shader_get_uniform_location(c->shader, "ourTexture"), 0);
-        c->shader->SetUniformValues("ourTexture", 0);
+    //    c->shader->SetUniformValues("ourTexture", 0);
 }
 
 static void release_resource(GlContext *c)

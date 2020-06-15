@@ -26,7 +26,7 @@ static void draw_triangle(GlContext *c)
 {
 	double time_value = glfwGetTime();
 	double green_value = (sin(time_value) / 2.0f) + 0.5f;
-        c->shader->SetUniformValues("ourColor", 0.0, green_value, 0.0, 1.0);
+        // c->shader->SetUniformValues("ourColor", 0.0, green_value, 0.0, 1.0);
         c->shader->Use();
 	// shader_uniform_set_float4(c->shader, "ourColor", 0.0f, green_value, 0.0f, 1.0f);
 	// shader_use(c->shader);
