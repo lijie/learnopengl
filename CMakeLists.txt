@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(learnopengl)
 
-set(common_files common/shader.cc src/glad.c)
+set(common_files common/shader.cc common/camera.cc src/glad.c)
 
 set(dep_libs_win opengl32 legacy_stdio_definitions)
 set(dep_libs_linux GL dl m)
@@ -36,3 +36,11 @@ target_link_libraries(transformation LINK_PUBLIC glfw ${dep_libs})
 add_executable(coordinate coordinate/coordinate.cc ${common_files})
 target_include_directories(coordinate PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
 target_link_libraries(coordinate LINK_PUBLIC glfw ${dep_libs})
+
+add_executable(camera camera/camera.cc ${common_files})
+target_include_directories(camera PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
+target_link_libraries(camera LINK_PUBLIC glfw ${dep_libs})
+
+add_executable(basic_lighting basic_lighting/basic_lighting.cc ${common_files})
+target_include_directories(basic_lighting PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
+target_link_libraries(basic_lighting LINK_PUBLIC glfw ${dep_libs})

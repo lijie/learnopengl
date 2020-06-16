@@ -17,5 +17,14 @@ class GlContext {
   int texture_ids[TEXTURE_ID_NR];
 };
 
+class Camera;
+class Scene {
+  public:
+    void AddCamera(Camera *c) { camera_ = c; }
+    Camera *GetCamera() { return camera_; }
+  private:
+    Camera *camera_;
+};
+
 #endif
 
