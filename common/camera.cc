@@ -1,16 +1,21 @@
 
 #include "camera.h"
 
-Camera::Camera(const Vec3& pos, const Vec3& up, double fov) {
+Camera::Camera(const Vec3& pos, const Vec3& up, double fov, double aspect_ratio) {
   position_ = pos;
   world_up_ = up;
   fov_ = fov;
+  aspect_ratio_ = aspect_ratio;
 
   UpdateVectors();
 }
 
 Mat4 Camera::GetViewMatrix() {
   return glm::lookAt(position_, position_ + front_, up_);
+}
+
+Mat4 Camera::GetProjectionMatrix() {
+    return glm::perspective(glm::radians(fov()), aspect_ratio_, 0.1, 100.0);
 }
 
 void Camera::UpdateVectors() {

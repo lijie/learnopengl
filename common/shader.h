@@ -39,6 +39,8 @@ class Shader {
   const char *vertex_source_ = nullptr;
   const char *fragment_source_ = nullptr;
 #define SHADER_FLAGS_EXTERNAL_SOURCE (1 << 0)
+#define SHADER_FLAGS_ALREADY_READ (1 << 1)
+#define SHADER_FLAGS_ALREADY_COMPILE (1 << 2)
   uint32_t flags_ = 0;
   uint32_t vertex_shader_ = 0;
   uint32_t fragment_shader_ = 0;

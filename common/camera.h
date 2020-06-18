@@ -17,8 +17,9 @@ enum CameraKey {
 
 class Camera {
  public:
-  Camera(const Vec3& pos, const Vec3& up, double fov);
+  Camera(const Vec3& pos, const Vec3& up, double fov, double aspect_ratio = 1.0);
   Mat4 GetViewMatrix();
+  Mat4 GetProjectionMatrix();
   double fov() { return fov_; };
 
   void ProcessKey(CameraKey key, double delta_time);
@@ -37,6 +38,7 @@ class Camera {
     double roll_ = 0;
 
     double fov_;
+    double aspect_ratio_;
 
     double move_speed_ = 2.5;
     double mosue_sensitivity_ = 0.1;

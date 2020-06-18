@@ -49,9 +49,13 @@ Shader::Shader(const char *v_src, const char *f_src) {
 }
 
 bool Shader::Open(const char *v_path, const char *f_path) {
+  if (flags_ & SHADER_FLAGS_ALREADY_READ) {
+    return true;
+  }
   vertex_source_ = read_file(v_path);
   fragment_source_ = read_file(f_path);
   flags_ &= ~(SHADER_FLAGS_EXTERNAL_SOURCE);
+  flags_ != SHADER_FLAGS_ALREADY_READ;
   return true;
 }
 
@@ -86,6 +90,10 @@ bool Shader::CompileAndLink() {
   uint32_t fragment_shader;
   uint32_t shader_program;
   bool res = false;
+
+  if (flags_ & SHADER_FLAGS_ALREADY_COMPILE) {
+    return true;
+  }
 	
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_source_, NULL);
@@ -118,6 +126,7 @@ bool Shader::CompileAndLink() {
   fragment_shader_ = fragment_shader;
   vertex_shader_ = vertex_shader;
   program_ = shader_program;
+  flags_ |= SHADER_FLAGS_ALREADY_COMPILE;
   res = true;
 
 out:
