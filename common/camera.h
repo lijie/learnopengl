@@ -1,12 +1,7 @@
 #ifndef __LEARNOPENGL_COMMON__
 #define __LEARNOPENGL_COMMON__
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-typedef glm::vec3 Vec3;
-typedef glm::mat4 Mat4;
+#include "lo_common.h"
 
 enum CameraKey {
     kCameraKeyForward = 1,

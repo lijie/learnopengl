@@ -3,12 +3,14 @@
 
 #include <memory>
 
+#include "lo_common.h"
+
 class Material;
+class GLContext;
 
-class Shape {};
-
-class Cube : public Shape {
+class Shape {
  public:
+  Shape();
   float *vertices() { return vertices_; }
   int vertex_size() { return vertex_size_; }
   void set_vertices(float *v, int n) {
@@ -18,11 +20,21 @@ class Cube : public Shape {
 
   void set_material(std::shared_ptr<Material> m) { material_ = m; }
 
- private:
+  void Translate(const Vec3& v);
+  void Scale(const Vec3& v);
+
+  virtual bool Draw(GLContext *ctx);
+
+ protected:
   float *vertices_ = nullptr;
   int vertex_size_ = 0;
-
+  Mat4 model_;
   std::shared_ptr<Material> material_ = nullptr;
+};
+
+class Cube : public Shape {
+  public:
+    Cube();
 };
 
 #endif  // __LEARNOPENGL_COMMON_H__
