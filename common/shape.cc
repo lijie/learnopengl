@@ -12,7 +12,7 @@ void Shape::Translate(const Vec3& v) { model_ = glm::translate(model_, v); }
 
 void Shape::Scale(const Vec3& v) { model_ = glm::scale(model_, v); }
 
-bool Shape::Draw(GLContext* ctx) {
+void Shape::Draw(GLContext* ctx) {
   unsigned int loc = material_->shader->GetUniformLocation("model");
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model_));
 
@@ -26,7 +26,6 @@ bool Shape::Draw(GLContext* ctx) {
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
 
   glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
-  return true;
 }
 
 // cube vertices and normal

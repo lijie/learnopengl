@@ -2,6 +2,7 @@
 #define __TEST_OPENGL_SHADER_H__
 
 #include <stdint.h>
+#include <memory>
 
 class Shader {
  public:
@@ -49,6 +50,8 @@ class Shader {
   int CheckCompileSuccess(uint32_t shader);
   int CheckLinkSuccess(uint32_t program);
 };
+
+typedef std::shared_ptr<Shader> shader_t;
 
 #if 0
 struct shader;

@@ -4,11 +4,12 @@
 #include <memory>
 
 #include "lo_common.h"
+#include "renderer.h"
 
 class Material;
 class GLContext;
 
-class Shape {
+class Shape : public Renderer {
  public:
   Shape();
   float *vertices() { return vertices_; }
@@ -23,7 +24,7 @@ class Shape {
   void Translate(const Vec3& v);
   void Scale(const Vec3& v);
 
-  virtual bool Draw(GLContext *ctx);
+  void Draw(GLContext *ctx) override;
 
  protected:
   float *vertices_ = nullptr;
