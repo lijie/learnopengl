@@ -14,6 +14,7 @@
 #include "material.h"
 #include "camera.h"
 #include "shape.h"
+#include "model.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -323,6 +324,12 @@ static void init_texture(GlContext *c) {
   light_material.texture_id[1] = id1;
 }
 
+static void init_model(GlContext *c) {
+    Model model;
+    std::string path = "../basic_model/nanosuit/nanosuit.obj";
+    model.Load(path, false);
+}
+
 static void release_resource(GlContext *c) {
   glDeleteVertexArrays(1, &c->vao);
   glDeleteBuffers(1, &c->vbo);
@@ -350,10 +357,11 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_button_callback);
 
   init_scene();
+  init_model(context);
 
-  load_shader(context);
-  init_vertices(context);
-  init_texture(context);
+  // load_shader(context);
+  // init_vertices(context);
+  // init_texture(context);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -366,7 +374,7 @@ int main() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    draw(context);
+    // draw(context);
 
     glfwSwapBuffers(window);
     glfwPollEvents();

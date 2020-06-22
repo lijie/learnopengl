@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "material.h"
+
 class Shader;
 
 class GlContext {
@@ -14,7 +16,7 @@ class GlContext {
   uint32_t ebo = 0;
   Shader *shader = nullptr;
 #define TEXTURE_ID_NR 16
-  int texture_ids[TEXTURE_ID_NR];
+  texture_t texture_ids[TEXTURE_ID_NR];
 };
 
 #endif

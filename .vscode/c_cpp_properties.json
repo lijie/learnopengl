@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/deps/glfw-3.3.2.bin.WIN64/include",
-                "${workspaceFolder}/deps/glm-0.9.9.9"
+                "${workspaceFolder}/deps/glm-0.9.9.9",
+                "${workspaceFolder}/deps/assimp/include"
             ],
             "defines": [
                 "_DEBUG",

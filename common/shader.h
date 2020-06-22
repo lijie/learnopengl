@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <memory>
 
+#include "glad/glad.h"
+
 class Shader {
  public:
   Shader() {};
