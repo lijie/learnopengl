@@ -1,5 +1,5 @@
-#ifndef __LEARNOPENGL_COMMON_H__
-#define __LEARNOPENGL_COMMON_H__
+#ifndef __LEARNOPENGL_COMMON_SHAPE_H__
+#define __LEARNOPENGL_COMMON_SHAPE_H__
 
 #include <memory>
 
@@ -7,7 +7,7 @@
 #include "renderer.h"
 
 class Material;
-class GLContext;
+class GlContext;
 
 class Shape : public Renderer {
  public:
@@ -21,10 +21,10 @@ class Shape : public Renderer {
 
   void set_material(std::shared_ptr<Material> m) { material_ = m; }
 
-  void Translate(const Vec3& v);
-  void Scale(const Vec3& v);
+  void Translate(const Vec3 &v);
+  void Scale(const Vec3 &v);
 
-  void Draw(GLContext *ctx) override;
+  void Render(GlContext *ctx) override;
 
  protected:
   float *vertices_ = nullptr;
@@ -34,8 +34,13 @@ class Shape : public Renderer {
 };
 
 class Cube : public Shape {
-  public:
-    Cube();
+ public:
+  Cube();
 };
 
-#endif  // __LEARNOPENGL_COMMON_H__
+class LightSource : public Cube {
+ public:
+  LightSource();
+};
+
+#endif  // __LEARNOPENGL_COMMON_SHAPE_H__

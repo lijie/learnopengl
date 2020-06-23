@@ -5,6 +5,7 @@
 
 #include "lo_common.h"
 #include "material.h"
+#include "renderer.h"
 
 struct Vertex {
   Vec3 Position;
@@ -14,17 +15,21 @@ struct Vertex {
   Vec3 Bitangent;
 };
 
-class Mesh {
+class Mesh : public Renderer {
  public:
+  Mesh();
+  ~Mesh();
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
   // std::vector<Texture> textures;
   std::shared_ptr<Material> material;
 
-  private:
-  int vao, vbo, ebo;
+  void Render(GlContext *ctx) override;
 
-  void setupMesh();
+ private:
+  unsigned int vao, vbo, ebo;
+
+  void Submit();
 };
 
 #endif  // __LEARNOPENGL_COMMON_MESH_H__

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(learnopengl)
 
-set(common_files common/shader.cc common/camera.cc src/glad.c common/lo_common.cc common/shape.cc common/material.cc common/model.cc)
+set(common_files common/shader.cc common/camera.cc src/glad.c common/lo_common.cc common/shape.cc common/material.cc common/model.cc common/mesh.cc common/scene.cc)
 
 set(dep_libs_win opengl32 legacy_stdio_definitions)
 set(dep_libs_linux GL dl m)

@@ -9,12 +9,15 @@
 #include "material.h"
 #include "mesh.h"
 
-class Model {
+class GlContext;
+
+class Model : public Renderer {
  public:
   Model() {}
   bool Load(const std::string &path, bool gamma = false);
   std::vector<Mesh *> meshes;
-  Material *material;
+
+  void Render(GlContext *c) override;
 
  private:
   std::string directory_;

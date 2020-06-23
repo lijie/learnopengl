@@ -29,7 +29,7 @@ void Camera::UpdateVectors() {
   front_ = glm::normalize(direction);
 
   // 右手准则
-  right_ = glm::normalize(glm::cross(world_up_, front_));
+  right_ = glm::normalize(glm::cross(front_, world_up_));
   up_ = glm::normalize(glm::cross(right_, front_));
 }
 

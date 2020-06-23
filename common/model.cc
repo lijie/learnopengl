@@ -22,6 +22,12 @@ bool Model::Load(const std::string &path, bool gamma) {
   return true;
 }
 
+void Model::Render(GlContext *c) {
+  for (auto i = 0; i < meshes.size(); i++) {
+    meshes[i]->Render(c);
+  }
+}
+
 void Model::ProcessNode(aiNode *node, const aiScene *scene) {
   // process each mesh located at the current node
   for (unsigned int i = 0; i < node->mNumMeshes; i++) {
@@ -109,18 +115,22 @@ Mesh *Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
   auto diffuse_texture =
       LoadMaterialTextures(material, aiTextureType_DIFFUSE, kDiffuseTex);
   if (diffuse_texture != nullptr) {
-    _material->diffuse_textures.push_back(diffuse_texture);
+    _material->textures.push_back(diffuse_texture);
   }
   auto specular_texture =
       LoadMaterialTextures(material, aiTextureType_SPECULAR, kSpecularTex);
   if (specular_texture != nullptr) {
-    _material->specular_textures.push_back(specular_texture);
+    _material->textures.push_back(specular_texture);
   }
   auto normal_texture =
       LoadMaterialTextures(material, aiTextureType_NORMALS, kNormalTex);
   if (normal_texture != nullptr) {
-    _material->normal_textures.push_back(normal_texture);
+    _material->textures.push_back(normal_texture);
   }
+
+  // set default shader
+  _material->shader = Shader::NewShader("../basic_model/model_shader");
+  assert(_material->shader != nullptr);
 
   // return a mesh object created from the extracted mesh data
   // return new Mesh(vertices, indices, textures);

@@ -1,11 +1,23 @@
+#include "shader.h"
+
+#include <GLFW/glfw3.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-#include "shader.h"
 
-#define ERROR(fmt, ...) fprintf(stderr, "ERROR:SHADER[%s:%d]:" fmt, __func__, __LINE__, ##__VA_ARGS__)
+#include <map>
+#include <string>
+
+#include "glad/glad.h"
+
+#include "lo_common.h"
+#include "camera.h"
+#include "scene.h"
+
+#define ERROR(fmt, ...) \
+  fprintf(stderr, "ERROR:SHADER[%s:%d]:" fmt, __func__, __LINE__, ##__VA_ARGS__)
+
+static std::map<std::string, shader_t> ShaderCollections;
 
 #if 0
 struct shader {
@@ -19,7 +31,24 @@ struct shader {
 };
 #endif
 
-static const char * read_file(const char *path) {
+std::shared_ptr<Shader> Shader::NewShader(const std::string &shader_name) {
+  auto it = ShaderCollections.find(shader_name);
+  if (it != ShaderCollections.end()) return it->second;
+
+  std::string v_path = shader_name + "_vertex.glsl";
+  std::string f_path = shader_name + "_fragment.glsl";
+
+  auto shader = std::make_shared<Shader>();
+  shader->Open(v_path.c_str(), f_path.c_str());
+  bool res = shader->CompileAndLink();
+  if (!res) {
+    return nullptr;
+  }
+  ShaderCollections[shader_name] = shader;
+  return shader;
+}
+
+static const char *read_file(const char *path) {
   FILE *f = fopen(path, "r");
   assert(f != NULL);
 
@@ -55,7 +84,7 @@ bool Shader::Open(const char *v_path, const char *f_path) {
   vertex_source_ = read_file(v_path);
   fragment_source_ = read_file(f_path);
   flags_ &= ~(SHADER_FLAGS_EXTERNAL_SOURCE);
-  flags_ != SHADER_FLAGS_ALREADY_READ;
+  flags_ |= SHADER_FLAGS_ALREADY_READ;
   return true;
 }
 
@@ -94,7 +123,7 @@ bool Shader::CompileAndLink() {
   if (flags_ & SHADER_FLAGS_ALREADY_COMPILE) {
     return true;
   }
-	
+
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_source_, NULL);
   glCompileShader(vertex_shader);
@@ -136,9 +165,38 @@ out:
 }
 
 void Shader::Use() {
+  // InitMatrixUniforms();
   glUseProgram(program_);
 }
 
 int Shader::GetUniformLocation(const char *name) {
   return glGetUniformLocation(program_, name);
+}
+
+void Shader::InitMatrixUniforms() {
+  glm::mat4 model = glm::mat4(1.0);
+  model = glm::translate(model, Vec3(1, 0, 0));
+  // model = glm::scale(model, glm::vec3(1, 1, 1));
+  // model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f,
+  // 0.5f)); model = glm::translate(model, cube_positions[i]);
+
+  auto view = GetWorld()->GetCamera()->GetViewMatrix();
+  auto projection = GetWorld()->GetCamera()->GetViewMatrix();
+  auto mvp = projection * view * model;
+  auto mv3x3 = glm::mat3x3(projection * view);
+
+  unsigned int loc = GetUniformLocation("model");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
+
+  loc = GetUniformLocation("view");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
+
+  loc = GetUniformLocation("projection");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
+
+  loc = GetUniformLocation("mvp");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mvp));
+
+  loc = GetUniformLocation("mv3x3");
+  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mv3x3));
 }

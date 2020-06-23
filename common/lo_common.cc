@@ -1,4 +1,5 @@
 #include "lo_common.h"
+#include "scene.h"
 
 Scene world;
 

@@ -5,6 +5,7 @@
 #include "material.h"
 #include "shader.h"
 #include "camera.h"
+#include "scene.h"
 
 Shape::Shape() { model_ = glm::mat4(1.0); }
 
@@ -12,7 +13,7 @@ void Shape::Translate(const Vec3& v) { model_ = glm::translate(model_, v); }
 
 void Shape::Scale(const Vec3& v) { model_ = glm::scale(model_, v); }
 
-void Shape::Draw(GLContext* ctx) {
+void Shape::Render(GlContext* ctx) {
   unsigned int loc = material_->shader->GetUniformLocation("model");
   glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model_));
 
@@ -75,4 +76,9 @@ static float cube_vertices[] = {
 
 Cube::Cube(): Shape() {
     set_vertices(&cube_vertices[0], 36);
+}
+
+LightSource::LightSource() {
+  material_ = std::make_shared<Material>();
+  material_->shader = Shader::NewShader("../shaders/light_source");
 }

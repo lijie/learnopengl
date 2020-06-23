@@ -27,16 +27,17 @@ material_t Material::FindMaterial(const std::string& name) {
 
 static std::map<std::string, texture_t> TextureCollections;
 
-void Texture::Unbind() { texture_id = GL_TEXTURE0 - 1; }
+Texture::~Texture() {
+  glDeleteTextures(1, (const GLuint *)&texture_id);
+}
 
-void Texture::SetupTexture(GlContext* ctx) {
+void Texture::SetupTexture() {
   // check texture id
   int idx = texture_id - GL_TEXTURE0;
   if (idx >= GL_TEXTURE0 && idx < GL_TEXTURE0 + 16) return;
 
   unsigned int id;
   glGenTextures(1, &id);
-  glBindTexture(GL_TEXTURE_2D, id);
 
   GLenum format = GL_RGB;
   if (channel == 1) {
@@ -45,6 +46,10 @@ void Texture::SetupTexture(GlContext* ctx) {
     format = GL_RGBA;
   }
 
+  // TODO:
+  // OpenGL 同时能绑定的tex是有上限的, 应该用时再绑定并传递数据?
+
+  glBindTexture(GL_TEXTURE_2D, id);
   glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
@@ -66,6 +71,7 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
       stbi_load(path.c_str(), &tex->width, &tex->height, &tex->channel, 0);
   if (tex->data == NULL) return nullptr;
   tex->type = type;
+  tex->SetupTexture();
   TextureCollections[path] = tex;
   return tex;
 }

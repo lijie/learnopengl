@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <memory>
+#include <string>
 
 #include "glad/glad.h"
 
@@ -37,6 +38,10 @@ class Shader {
   inline uint32_t program() {
     return program_;
   }
+
+  void InitMatrixUniforms();
+
+  static std::shared_ptr<Shader> NewShader(const std::string& shader_name);
 
  private:
   const char *vertex_source_ = nullptr;
