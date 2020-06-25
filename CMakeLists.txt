@@ -18,6 +18,7 @@ if (WIN32)
 	SET_TARGET_PROPERTIES(assimp PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/deps/assimp/lib/assimp-vc142-mtd.lib)
 
 	set(dep_libs ${dep_libs_win} assimp)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 else ()
 	set(dep_libs ${dep_libs_linux})
 endif (WIN32)

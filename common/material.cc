@@ -33,8 +33,8 @@ Texture::~Texture() {
 
 void Texture::SetupTexture() {
   // check texture id
-  int idx = texture_id - GL_TEXTURE0;
-  if (idx >= GL_TEXTURE0 && idx < GL_TEXTURE0 + 16) return;
+  // int idx = texture_id - GL_TEXTURE0;
+  // if (idx >= GL_TEXTURE0 && idx < GL_TEXTURE0 + 16) return;
 
   unsigned int id;
   glGenTextures(1, &id);
@@ -72,6 +72,20 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
   if (tex->data == NULL) return nullptr;
   tex->type = type;
   tex->SetupTexture();
+  fprintf(stdout, "Texutre: Generate texture id %d for %s\n", tex->texture_id, path.c_str());
   TextureCollections[path] = tex;
   return tex;
+}
+
+void Material::UpdateShaderUniforms(Mat4 model) {
+  int loc = shader->GetUniformLocation("phong_exponent");
+  if (loc >= 0)
+    glUniform1f(loc, phong_exponent);
+
+  shader->InitMatrixUniforms(model);
+}
+
+void Material::UseShader(Mat4 model) {
+  shader->Use();
+  UpdateShaderUniforms(model);
 }

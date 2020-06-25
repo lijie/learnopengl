@@ -7,6 +7,8 @@
 
 #include "glad/glad.h"
 
+#include "lo_common.h"
+
 class Shader {
  public:
   Shader() {};
@@ -39,7 +41,12 @@ class Shader {
     return program_;
   }
 
-  void InitMatrixUniforms();
+  void InitMatrixUniforms(Mat4 model);
+
+  template<typename T>
+  void SetParameter(const std::string& name, T value) {
+    
+  }
 
   static std::shared_ptr<Shader> NewShader(const std::string& shader_name);
 

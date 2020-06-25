@@ -8,10 +8,9 @@
 #include <map>
 #include <string>
 
-#include "glad/glad.h"
-
-#include "lo_common.h"
 #include "camera.h"
+#include "glad/glad.h"
+#include "lo_common.h"
 #include "scene.h"
 
 #define ERROR(fmt, ...) \
@@ -164,39 +163,49 @@ out:
   return res;
 }
 
-void Shader::Use() {
-  // InitMatrixUniforms();
-  glUseProgram(program_);
-}
+void Shader::Use() { glUseProgram(program_); }
 
 int Shader::GetUniformLocation(const char *name) {
   return glGetUniformLocation(program_, name);
 }
 
-void Shader::InitMatrixUniforms() {
-  glm::mat4 model = glm::mat4(1.0);
-  model = glm::translate(model, Vec3(1, 0, 0));
+void Shader::InitMatrixUniforms(Mat4 model) {
+  // glm::mat4 model = glm::mat4(1.0);
+  // model = glm::translate(model, Vec3(1, 0, 0));
   // model = glm::scale(model, glm::vec3(1, 1, 1));
   // model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f,
   // 0.5f)); model = glm::translate(model, cube_positions[i]);
 
   auto view = GetWorld()->GetCamera()->GetViewMatrix();
-  auto projection = GetWorld()->GetCamera()->GetViewMatrix();
+  auto projection = GetWorld()->GetCamera()->GetProjectionMatrix();
   auto mvp = projection * view * model;
-  auto mv3x3 = glm::mat3x3(projection * view);
+  auto mv3x3 = glm::mat3(view * model);
 
-  unsigned int loc = GetUniformLocation("model");
-  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
+  int loc = GetUniformLocation("model");
+  if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
 
   loc = GetUniformLocation("view");
-  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
+  if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
 
   loc = GetUniformLocation("projection");
-  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
+  if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(projection));
 
   loc = GetUniformLocation("mvp");
-  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mvp));
+  if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mvp));
 
   loc = GetUniformLocation("mv3x3");
-  glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mv3x3));
+  if (loc >= 0) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mv3x3));
+
+  auto light_source = GetWorld()->GetLightSource();
+  auto light_position = light_source->position();
+  loc = GetUniformLocation("light_position");
+  if (loc > 0) glUniform3fv(loc, 1, glm::value_ptr(light_position));
+
+  auto light_power = light_source->power();
+  loc = GetUniformLocation("light_power");
+  if (loc >= 0) glUniform1f(loc, light_power);
+
+  auto light_color = light_source->color();
+  loc = GetUniformLocation("light_color");
+  if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(light_color));
 }

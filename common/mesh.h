@@ -28,6 +28,7 @@ class Mesh : public Renderer {
 
  private:
   unsigned int vao, vbo, ebo;
+  bool submit_done_ = false;
 
   void Submit();
 };

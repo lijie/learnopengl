@@ -22,6 +22,8 @@ class Scene {
     AddRenderer(ls);
   }
 
+  std::shared_ptr<LightSource> GetLightSource() { return light_source_; }
+
   void ForEachRenderer(std::function<void(std::shared_ptr<Renderer>)> f) {
     auto it = renderer_list_.begin();
     while (it != renderer_list_.end()) {

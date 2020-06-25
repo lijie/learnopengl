@@ -1,8 +1,9 @@
+#include "mesh.h"
+
 #include <stddef.h>
 
-#include "mesh.h"
-#include "lo_common.h"
 #include "camera.h"
+#include "lo_common.h"
 #include "scene.h"
 
 static std::string GetUniformName(TextureType type, int idx) {
@@ -27,8 +28,10 @@ Mesh::~Mesh() {
   glDeleteVertexArrays(1, &vao);
   glDeleteBuffers(1, &vbo);
   glDeleteBuffers(1, &ebo);
+  submit_done_ = false;
 }
 
+#if 0
 static void InitShaderLight(GlContext *c, std::shared_ptr<Shader> shader) {
 }
 
@@ -65,32 +68,52 @@ static void InitShader(GlContext *c, std::shared_ptr<Shader> shader) {
   InitShaderLight(c, shader);
   shader->Use();
 }
+#endif
 
 void Mesh::Render(GlContext *ctx) {
-  InitShader(ctx, material->shader);
-  material->shader->Use();
+  // InitShader(ctx, material->shader);
+  material->UseShader(glm::mat4(1.0));
 
   Submit();
 
-  for (auto i = 0; i < material->textures.size(); i++) {
+#if 1
+  int diffuse_idx = 0;
+  int specular_idx = 0;
+  int normal_idx = 0;
+  std::string name;
+  for (int i = 0; i < material->textures.size(); i++) {
     auto tex = material->textures[i];
-    // 激活纹理单元
-    glActiveTexture(GL_TEXTURE0 + i);
-
-    auto name = GetUniformName(tex->type, i);
-    material->shader->SetUniformValues(name.c_str(), i);
-    glBindTexture(GL_TEXTURE_2D, material->textures[i]->texture_id);
+    if (tex->type == kDiffuseTex) {
+      name = "diffuseTexture" + std::to_string(diffuse_idx);
+      diffuse_idx++;
+    } else if (tex->type == kSpecularTex) {
+      name = "specularTexture" + std::to_string(specular_idx);
+      specular_idx++;
+    } else if (tex->type == kNormalTex) {
+      name = "normalTexture" + std::to_string(normal_idx);
+      normal_idx++;
+    } else {
+      assert(0);
+    }
+    if (material->shader->SetUniformValues(name.c_str(), i) >= 0) {
+      glActiveTexture(GL_TEXTURE0 + i);
+      glBindTexture(GL_TEXTURE_2D, tex->texture_id);
+    } else {
+      assert(0);
+    }
   }
+#endif
 
   glBindVertexArray(vao);
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
-  glBindVertexArray(0);
-  glActiveTexture(GL_TEXTURE0);
+  // glBindVertexArray(0);
+  // glActiveTexture(GL_TEXTURE0);
 }
 
 // Submit data to GPU
 void Mesh::Submit() {
+  // if (submit_done_) return;
   glBindVertexArray(vao);
   // load data into vertex buffers
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -126,5 +149,6 @@ void Mesh::Submit() {
   glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Bitangent));
 
-  glBindVertexArray(0);
+  // glBindVertexArray(0);
+  submit_done_ = true;
 }

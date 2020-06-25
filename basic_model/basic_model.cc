@@ -115,14 +115,21 @@ glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
 static void init_model(GlContext *c) {
   auto model = std::make_shared<Model>();
-    std::string path = "../basic_model/nanosuit/nanosuit.obj";
+    std::string path = "../models/nanosuit/nanosuit.obj";
+    // std::string path = "../models/backpack/backpack.obj";
     model->Load(path, false);
     GetWorld()->AddRenderer(model);
 }
 
 static void init_scene(GlContext *c) {
+  stbi_set_flip_vertically_on_load(1);
+
   Camera *camera = new Camera(Vec3(0.0, 0.0, 3.0), Vec3(0, 1, 0), 45.0, (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
+
+  auto light_source = std::make_shared<LightSource>();
+  GetWorld()->AddLightSource(light_source);
+  light_source->Translate(Vec3(1, 3, 4));
 
   init_model(c);
 }
@@ -144,7 +151,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(screen_width, screen_height, "hello", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(screen_width, screen_height, "OpenGL Demo", NULL, NULL);
   assert(window != NULL);
   glfwMakeContextCurrent(window);
 
@@ -171,7 +178,7 @@ int main() {
 
     process_input(window);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     draw(context);

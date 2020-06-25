@@ -4,8 +4,7 @@ bool Model::Load(const std::string &path, bool gamma) {
   // read file via ASSIMP
   Assimp::Importer importer;
   const aiScene *scene =
-      importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs |
-                                  aiProcess_CalcTangentSpace);
+      importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
   // check for errors
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {
@@ -123,7 +122,7 @@ Mesh *Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
     _material->textures.push_back(specular_texture);
   }
   auto normal_texture =
-      LoadMaterialTextures(material, aiTextureType_NORMALS, kNormalTex);
+      LoadMaterialTextures(material, aiTextureType_HEIGHT, kNormalTex);
   if (normal_texture != nullptr) {
     _material->textures.push_back(normal_texture);
   }

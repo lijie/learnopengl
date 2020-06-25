@@ -35,7 +35,7 @@ class Camera {
     double fov_;
     double aspect_ratio_;
 
-    double move_speed_ = 2.5;
+    double move_speed_ = 5;
     double mosue_sensitivity_ = 0.1;
 
     void UpdateVectors();

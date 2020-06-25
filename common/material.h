@@ -60,6 +60,7 @@ class Material {
   Material(){};
   std::shared_ptr<Shader> shader;
   std::vector<texture_t> textures;
+  float phong_exponent = 5;
   // std::vector<texture_t> diffuse_textures;
   // std::vector<texture_t> specular_textures;
   // std::vector<texture_t> normal_textures;
@@ -69,7 +70,10 @@ class Material {
   // deprecated
   int texture_id[MATERIAL_TEXTURE_NUM];
 
-  void UpdateShaderUniforms(){};
+  void UseShader(Mat4 model);
+
+ private:
+  void UpdateShaderUniforms(Mat4 model);
 
   // static void Init();
   // static material_t FindMaterial(const std::string& name);
