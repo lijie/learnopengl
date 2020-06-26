@@ -9,6 +9,7 @@
 
 #include "lo_common.h"
 
+class Transform;
 class Shader {
  public:
   Shader() {};
@@ -41,7 +42,7 @@ class Shader {
     return program_;
   }
 
-  void InitMatrixUniforms(Mat4 model);
+  void InitMatrixUniforms(Transform *t);
 
   template<typename T>
   void SetParameter(const std::string& name, T value) {

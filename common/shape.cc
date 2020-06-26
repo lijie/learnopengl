@@ -8,9 +8,6 @@
 #include "scene.h"
 
 Shape::Shape() {
-  position_ = Vec3(0, 0, 0);
-  scale_ = Vec3(1.0, 1.0, 1.0);
-
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, &vbo);
   glGenBuffers(1, &ebo);
@@ -23,20 +20,20 @@ Shape::~Shape() {
 }
 
 void Shape::Translate(const Vec3& v) {
-  position_ = v;
+  set_position(v);
   // model_ = glm::translate(model_, v);
 }
 
 void Shape::Scale(const Vec3& v) {
-  scale_ = v;
+  set_scale(v);
   // model_ = glm::scale(model_, v);
 }
 
 void Shape::Render(GlContext* ctx) {
-  glm::mat4 model = glm::mat4(1.0);
-  model = glm::translate(model, position_);
-  model = glm::scale(model, scale_);
-  material_->UseShader(model);
+  // glm::mat4 model = glm::mat4(1.0);
+  // model = glm::translate(model, position_);
+  // model = glm::scale(model, scale_);
+  material_->UseShader(this);
   Submit();
   glBindVertexArray(vao);
   glDrawArrays(GL_TRIANGLES, 0, vertex_size_);

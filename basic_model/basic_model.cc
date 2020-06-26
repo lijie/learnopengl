@@ -35,25 +35,7 @@ static double mouse_last_y = 0;
 
 static bool enable_mouse_move = false;
 
-struct image_data {
-  uint8_t *data;
-  int width;
-  int height;
-  int nr_channel;
-};
-
-class LightCube : public Cube {
- public:
-  LightCube();
-};
-
-LightCube::LightCube() {
-
-}
-
-class SimpleCube : public Cube {
-
-};
+static Mat4 light_source_model = Mat4(1.0);
 
 static void framebuffer_size_callback(GLFWwindow *window, int width,
                                       int height) {
@@ -91,6 +73,17 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     }
 }
 
+void test_move(double dt) {
+  auto transform = GetWorld()->GetLightSource();
+  auto p = transform->position();
+
+  light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
+  light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
+  light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
+
+  transform->set_model(light_source_model);
+}
+
 static void process_input(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, 1);
@@ -105,6 +98,11 @@ static void process_input(GLFWwindow *window) {
     GetWorld()->GetCamera()->ProcessKey(kCameraKeyLeft, delta_time);
   } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
     GetWorld()->GetCamera()->ProcessKey(kCameraKeyRight, delta_time);
+  } else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+    GetWorld()->MoveTarget(2);
+    // test_move(delta_time);
+  } else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+    GetWorld()->MoveTarget(3);
   }
 }
 
@@ -119,6 +117,7 @@ static void init_model(GlContext *c) {
     // std::string path = "../models/backpack/backpack.obj";
     model->Load(path, false);
     GetWorld()->AddRenderer(model);
+    // GetWorld()->SetTarget(model);
 }
 
 static void init_scene(GlContext *c) {
@@ -129,7 +128,11 @@ static void init_scene(GlContext *c) {
 
   auto light_source = std::make_shared<LightSource>();
   GetWorld()->AddLightSource(light_source);
-  light_source->Translate(Vec3(1, 3, 4));
+
+  // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
+  // light_source->set_model(light_source_model);
+  light_source->Translate(Vec3(20, 20, 10));
+  light_source->set_power(600);
 
   init_model(c);
 }

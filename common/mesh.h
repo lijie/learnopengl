@@ -6,6 +6,7 @@
 #include "lo_common.h"
 #include "material.h"
 #include "renderer.h"
+#include "transform.h"
 
 struct Vertex {
   Vec3 Position;
@@ -15,7 +16,7 @@ struct Vertex {
   Vec3 Bitangent;
 };
 
-class Mesh : public Renderer {
+class Mesh : public Renderer, public Transform {
  public:
   Mesh();
   ~Mesh();

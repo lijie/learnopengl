@@ -5,11 +5,12 @@
 
 #include "lo_common.h"
 #include "renderer.h"
+#include "transform.h"
 
 class Material;
 class GlContext;
 
-class Shape : public Renderer {
+class Shape : public Renderer, public Transform {
  public:
   Shape();
   ~Shape();
@@ -25,8 +26,8 @@ class Shape : public Renderer {
   void Translate(const Vec3 &v);
   void Scale(const Vec3 &v);
 
-  Vec3 position() { return position_; }
-  Vec3 scale() { return scale_; }
+  // Vec3 position() { return position_; }
+  // Vec3 scale() { return scale_; }
 
   void set_color(const Vec3 &v) { albedo_ = v; }
   Vec3 color() { return albedo_; }
@@ -38,8 +39,8 @@ class Shape : public Renderer {
  protected:
   float *vertices_ = nullptr;
   int vertex_size_ = 0;
-  Vec3 position_;
-  Vec3 scale_;
+  // Vec3 position_;
+  // Vec3 scale_;
   Vec3 albedo_;
   unsigned int vao, vbo, ebo;
   // Mat4 model_;

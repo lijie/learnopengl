@@ -72,7 +72,7 @@ static void InitShader(GlContext *c, std::shared_ptr<Shader> shader) {
 
 void Mesh::Render(GlContext *ctx) {
   // InitShader(ctx, material->shader);
-  material->UseShader(glm::mat4(1.0));
+  material->UseShader(this);
 
   Submit();
 

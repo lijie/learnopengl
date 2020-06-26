@@ -11,6 +11,7 @@
 class Shader;
 class Texture;
 class GlContext;
+class Transform;
 
 // standard alias
 enum ColorAlias {
@@ -34,8 +35,7 @@ enum TextureType {
 
 class Texture {
  public:
-  Texture() {
-  }
+  Texture() {}
   ~Texture();
   // opengl texutre id
   int texture_id = -1;
@@ -43,12 +43,13 @@ class Texture {
   int channel = 0;
   int width = 0;
   int height = 0;
-  uint8_t *data = nullptr;
+  uint8_t* data = nullptr;
 
   void SetupTexture();
   void Unbind();
 
-  static std::shared_ptr<Texture> NewTexture(const std::string&, TextureType type);
+  static std::shared_ptr<Texture> NewTexture(const std::string&,
+                                             TextureType type);
 };
 
 typedef std::shared_ptr<Texture> texture_t;
@@ -70,10 +71,10 @@ class Material {
   // deprecated
   int texture_id[MATERIAL_TEXTURE_NUM];
 
-  void UseShader(Mat4 model);
+  void UseShader(Transform* t);
 
  private:
-  void UpdateShaderUniforms(Mat4 model);
+  void UpdateShaderUniforms(Transform* t);
 
   // static void Init();
   // static material_t FindMaterial(const std::string& name);

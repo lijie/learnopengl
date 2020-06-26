@@ -9,6 +9,7 @@
 
 class Camera;
 class Renderer;
+class Transform;
 
 class Scene {
  public:
@@ -23,6 +24,9 @@ class Scene {
   }
 
   std::shared_ptr<LightSource> GetLightSource() { return light_source_; }
+
+  void SetTarget(std::shared_ptr<Transform> target) {target_ = target; }
+  void MoveTarget(int dir);
 
   void ForEachRenderer(std::function<void(std::shared_ptr<Renderer>)> f) {
     auto it = renderer_list_.begin();
@@ -39,5 +43,6 @@ class Scene {
 
   std::list<std::shared_ptr<Renderer>> renderer_list_;
   std::shared_ptr<LightSource> light_source_;
+  std::shared_ptr<Transform> target_ = nullptr;
 };
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

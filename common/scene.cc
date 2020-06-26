@@ -10,3 +10,10 @@ void Scene::Render(GlContext *ctx) {
     it++;
   }
 }
+
+void Scene::MoveTarget(int dir) {
+  if (target_ == nullptr)
+  return;
+
+  target_->add_rotation(Vec3(0, 10, 0));
+}

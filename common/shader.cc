@@ -169,12 +169,21 @@ int Shader::GetUniformLocation(const char *name) {
   return glGetUniformLocation(program_, name);
 }
 
-void Shader::InitMatrixUniforms(Mat4 model) {
-  // glm::mat4 model = glm::mat4(1.0);
-  // model = glm::translate(model, Vec3(1, 0, 0));
-  // model = glm::scale(model, glm::vec3(1, 1, 1));
-  // model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f,
-  // 0.5f)); model = glm::translate(model, cube_positions[i]);
+void Shader::InitMatrixUniforms(Transform *transform) {
+  glm::mat4 model = glm::mat4(1.0);
+
+  if (transform->has_model()) {
+    model = transform->model();
+  } else {
+    model = glm::rotate(model, glm::radians(transform->rotation().x), glm::vec3(1, 0, 0));
+    model = glm::rotate(model, glm::radians(transform->rotation().y), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(transform->rotation().z), glm::vec3(0, 0, 1));
+
+    model = glm::translate(model, transform->position());
+    model = glm::scale(model, transform->scale());
+    // model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f,
+    // 0.5f)); model = glm::translate(model, cube_positions[i]);
+  }
 
   auto view = GetWorld()->GetCamera()->GetViewMatrix();
   auto projection = GetWorld()->GetCamera()->GetProjectionMatrix();

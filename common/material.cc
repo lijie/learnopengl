@@ -77,15 +77,15 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
   return tex;
 }
 
-void Material::UpdateShaderUniforms(Mat4 model) {
+void Material::UpdateShaderUniforms(Transform* t) {
   int loc = shader->GetUniformLocation("phong_exponent");
   if (loc >= 0)
     glUniform1f(loc, phong_exponent);
 
-  shader->InitMatrixUniforms(model);
+  shader->InitMatrixUniforms(t);
 }
 
-void Material::UseShader(Mat4 model) {
+void Material::UseShader(Transform* t) {
   shader->Use();
-  UpdateShaderUniforms(model);
+  UpdateShaderUniforms(t);
 }
