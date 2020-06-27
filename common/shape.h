@@ -2,6 +2,7 @@
 #define __LEARNOPENGL_COMMON_SHAPE_H__
 
 #include <memory>
+#include <functional>
 
 #include "lo_common.h"
 #include "renderer.h"
@@ -13,6 +14,7 @@ class GlContext;
 class Shape : public Renderer, public Transform {
  public:
   Shape();
+  Shape(shared_ptr<Material> mat) { material_ = mat; }
   ~Shape();
   float *vertices() { return vertices_; }
   int vertex_size() { return vertex_size_; }
@@ -32,6 +34,12 @@ class Shape : public Renderer, public Transform {
   void set_color(const Vec3 &v) { albedo_ = v; }
   Vec3 color() { return albedo_; }
 
+  void set_stencil_mask(uint8_t mask) { stencil_mask_ = mask; }
+  void set_render_callback(std::function<void(void)> before, std::function<void(void)> after) {
+    before_render_func_ = before;
+    after_render_func_ = after;
+  }
+
   void Render(GlContext *ctx) override;
 
   virtual void Submit() = 0;
@@ -43,13 +51,23 @@ class Shape : public Renderer, public Transform {
   // Vec3 scale_;
   Vec3 albedo_;
   unsigned int vao, vbo, ebo;
+  uint8_t stencil_mask_ = 0x00;
   // Mat4 model_;
   std::shared_ptr<Material> material_ = nullptr;
+
+  std::function<void(void)> before_render_func_ = nullptr;
+  std::function<void(void)> after_render_func_ = nullptr;
 };
 
 class Cube : public Shape {
  public:
   Cube();
+  void Submit() override;
+};
+
+class Plane : public Shape {
+ public:
+  Plane();
   void Submit() override;
 };
 

@@ -113,11 +113,87 @@ glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
 static void init_model(GlContext *c) {
   auto model = std::make_shared<Model>();
-    // std::string path = "../models/nanosuit/nanosuit.obj";
-    std::string path = "../models/backpack/backpack.obj";
+    std::string path = "../models/nanosuit/nanosuit.obj";
+    // std::string path = "../models/backpack/backpack.obj";
     model->Load(path, false);
     GetWorld()->AddRenderer(model);
     // GetWorld()->SetTarget(model);
+}
+
+static void init_plane(GlContext *c) {
+  auto plane = make_shared<Plane>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.2, 0.2, 0.2);
+  plane->set_material(mat);
+  GetWorld()->AddRenderer(plane);
+}
+
+static void init_cube1(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.6, 0.2, 0.2);
+  cube->set_material(mat);
+  cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
+  GetWorld()->AddRenderer(cube);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+  }, nullptr);
+}
+
+static void init_cube2(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.2, 0.2, 0.8);
+  cube->set_material(mat);
+  cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
+  GetWorld()->AddRenderer(cube);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+  }, nullptr);
+}
+
+static void init_cube3(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/simple_nolight");
+  mat->albedo = Vec3(0.2, 1, 0.8);
+  cube->set_material(mat);
+  cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
+  cube->Scale(Vec3(1.05, 1.05, 1.05));
+  GetWorld()->AddRenderer(cube, 1);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+  }, []() {
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glEnable(GL_DEPTH_TEST);
+  });
+}
+
+static void init_cube4(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/simple_nolight");
+  mat->albedo = Vec3(0.2, 1, 0.8);
+  cube->set_material(mat);
+  cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
+  cube->Scale(Vec3(1.05, 1.05, 1.05));
+  GetWorld()->AddRenderer(cube, 1);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+  }, []() {
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glEnable(GL_DEPTH_TEST);
+  });
 }
 
 static void init_scene(GlContext *c) {
@@ -131,10 +207,15 @@ static void init_scene(GlContext *c) {
 
   // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
   // light_source->set_model(light_source_model);
-  light_source->Translate(Vec3(20, 20, 10));
-  light_source->set_power(600);
+  light_source->Translate(Vec3(0, 5, 0));
+  light_source->set_power(500);
 
-  init_model(c);
+  // init_model(c);
+  init_plane(c);
+  init_cube1(c);
+  init_cube2(c);
+  init_cube3(c);
+  init_cube4(c);
 }
 
 static void draw(GlContext *c) {
@@ -175,6 +256,10 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
+  glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
   while (!glfwWindowShouldClose(window)) {
     last_frame_time = current_frame_time;
     current_frame_time = glfwGetTime();
@@ -182,7 +267,7 @@ int main() {
     process_input(window);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     draw(context);
 

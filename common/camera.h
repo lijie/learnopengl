@@ -20,6 +20,8 @@ class Camera {
   void ProcessKey(CameraKey key, double delta_time);
   void ProcessMouse(double delta_x, double delta_y);
 
+  Vec3 position() { return position_; }
+
   private:
     Vec3 position_;
     Vec3 up_;

@@ -33,10 +33,17 @@ void Shape::Render(GlContext* ctx) {
   // glm::mat4 model = glm::mat4(1.0);
   // model = glm::translate(model, position_);
   // model = glm::scale(model, scale_);
+
+  if (before_render_func_ != nullptr)
+    before_render_func_();
   material_->UseShader(this);
   Submit();
   glBindVertexArray(vao);
+
+  // glStencilMask(stencil_mask_);
   glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
+  if (after_render_func_ != nullptr)
+    after_render_func_();
 }
 
 // cube vertices and normal
@@ -99,6 +106,47 @@ void Cube::Submit() {
   // struct and it translates perfectly to a glm::vec3/2 array which again
   // translates to 3/2 floats which translates to a byte array.
   glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), &cube_vertices[0],
+               GL_STATIC_DRAW);
+
+   // position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+  // normal
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+  // texture coord
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  glBindVertexArray(0);
+}
+
+float plane_vertices[] = {
+        // positions        // normal  // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         5.0f, -0.5f,  5.0f,  0.0f,  0.0f,  1.0f, 2.0f, 0.0f,
+        -5.0f, -0.5f,  5.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f,  0.0f,  1.0f, 0.0f, 2.0f,
+         5.0f, -0.5f,  5.0f,  0.0f,  0.0f,  1.0f, 2.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f,  0.0f,  1.0f, 0.0f, 2.0f,
+         5.0f, -0.5f, -5.0f,  0.0f,  0.0f,  1.0f, 2.0f, 2.0f
+    };
+
+Plane::Plane(): Shape() {
+    set_vertices(&plane_vertices[0], 6);
+}
+
+void Plane::Submit() {
+  // if (submit_done_) return;
+  glBindVertexArray(vao);
+  // load data into vertex buffers
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  // A great thing about structs is that their memory layout is sequential for
+  // all its items. The effect is that we can simply pass a pointer to the
+  // struct and it translates perfectly to a glm::vec3/2 array which again
+  // translates to 3/2 floats which translates to a byte array.
+  glBufferData(GL_ARRAY_BUFFER, sizeof(plane_vertices), &plane_vertices[0],
                GL_STATIC_DRAW);
 
    // position attribute

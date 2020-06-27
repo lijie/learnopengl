@@ -189,6 +189,7 @@ void Shader::InitMatrixUniforms(Transform *transform) {
   auto projection = GetWorld()->GetCamera()->GetProjectionMatrix();
   auto mvp = projection * view * model;
   auto mv3x3 = glm::mat3(view * model);
+  auto normal_model = glm::mat3(glm::transpose(glm::inverse(model)));
 
   int loc = GetUniformLocation("model");
   if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
@@ -205,6 +206,9 @@ void Shader::InitMatrixUniforms(Transform *transform) {
   loc = GetUniformLocation("mv3x3");
   if (loc >= 0) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mv3x3));
 
+  loc = GetUniformLocation("normal_model");
+  if (loc >= 0) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(normal_model));
+
   auto light_source = GetWorld()->GetLightSource();
   auto light_position = light_source->position();
   loc = GetUniformLocation("light_position");
@@ -217,4 +221,8 @@ void Shader::InitMatrixUniforms(Transform *transform) {
   auto light_color = light_source->color();
   loc = GetUniformLocation("light_color");
   if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(light_color));
+
+  auto camera_position = GetWorld()->GetCamera()->position();
+  loc = GetUniformLocation("camera_position");
+  if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(camera_position));
 }

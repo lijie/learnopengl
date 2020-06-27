@@ -54,3 +54,7 @@ target_link_libraries(basic_lighting LINK_PUBLIC glfw ${dep_libs})
 add_executable(basic_model basic_model/basic_model.cc ${common_files})
 target_include_directories(basic_model PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
 target_link_libraries(basic_model LINK_PUBLIC glfw ${dep_libs})
+
+add_executable(stencil_test stencil_test/stencil_test.cc ${common_files})
+target_include_directories(stencil_test PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
+target_link_libraries(stencil_test LINK_PUBLIC glfw ${dep_libs})

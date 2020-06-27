@@ -16,8 +16,7 @@ class Scene {
   void AddCamera(Camera *c) { camera_ = c; }
   Camera *GetCamera() { return camera_; }
 
-  void AddRenderer(std::shared_ptr<Renderer> r) { renderer_list_.push_back(r); }
-
+  void AddRenderer(std::shared_ptr<Renderer> r, int pri = 0);
   void AddLightSource(std::shared_ptr<LightSource> ls) {
     light_source_ = ls;
     AddRenderer(ls);
@@ -42,6 +41,8 @@ class Scene {
   Camera *camera_;
 
   std::list<std::shared_ptr<Renderer>> renderer_list_;
+  std::list<std::shared_ptr<Renderer>> renderer_list1_;
+  std::list<std::shared_ptr<Renderer>> renderer_list2_;
   std::shared_ptr<LightSource> light_source_;
   std::shared_ptr<Transform> target_ = nullptr;
 };

@@ -27,9 +27,7 @@ material_t Material::FindMaterial(const std::string& name) {
 
 static std::map<std::string, texture_t> TextureCollections;
 
-Texture::~Texture() {
-  glDeleteTextures(1, (const GLuint *)&texture_id);
-}
+Texture::~Texture() { glDeleteTextures(1, (const GLuint*)&texture_id); }
 
 void Texture::SetupTexture() {
   // check texture id
@@ -62,6 +60,17 @@ void Texture::SetupTexture() {
   texture_id = id;
 }
 
+static texture_t GenerateDefaultWhiteTexture() {
+  texture_t tex = std::make_shared<Texture>();
+  GLubyte data[] = {255, 255, 255, 255};
+  tex->data = data;
+  tex->width = 1;
+  tex->height = 1;
+  tex->channel = 4;
+  tex->SetupTexture();
+  return tex;
+}
+
 texture_t Texture::NewTexture(const std::string& path, TextureType type) {
   auto it = TextureCollections.find(path);
   if (it != TextureCollections.end()) return it->second;
@@ -72,15 +81,22 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
   if (tex->data == NULL) return nullptr;
   tex->type = type;
   tex->SetupTexture();
-  fprintf(stdout, "Texutre: Generate texture id %d for %s\n", tex->texture_id, path.c_str());
+  fprintf(stdout, "Texutre: Generate texture id %d for %s\n", tex->texture_id,
+          path.c_str());
   TextureCollections[path] = tex;
   return tex;
 }
 
+Material::Material(const std::string& shader_path) {
+  this->shader = Shader::NewShader(shader_path);
+  assert(this->shader != nullptr);
+}
+
 void Material::UpdateShaderUniforms(Transform* t) {
   int loc = shader->GetUniformLocation("phong_exponent");
-  if (loc >= 0)
-    glUniform1f(loc, phong_exponent);
+  if (loc >= 0) glUniform1f(loc, phong_exponent);
+  loc = shader->GetUniformLocation("albedo");
+  if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(albedo));
 
   shader->InitMatrixUniforms(t);
 }
