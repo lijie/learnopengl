@@ -28,7 +28,7 @@ void Scene::Render(GlContext *ctx) {
 void Scene::MoveTarget(int dir) {
   if (target_ == nullptr) return;
 
-  target_->add_rotation(Vec3(0, 10, 0));
+  // target_->add_rotation(Vec3(0, 10, 0));
 }
 
 void Scene::AddRenderer(shared_ptr<Renderer> renderer, int pri) {

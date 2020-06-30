@@ -51,8 +51,13 @@ void Texture::SetupTexture() {
   glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  auto wrap = GL_REPEAT;
+  if (format == GL_RGBA)
+    wrap = GL_CLAMP_TO_EDGE;
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -92,11 +97,37 @@ Material::Material(const std::string& shader_path) {
   assert(this->shader != nullptr);
 }
 
+static void UpdateShaderProperty(shared_ptr<Shader> shader, const std::string name, const std::any& value) {
+  int loc;
+  if (value.type() == typeid(float)) {
+    auto raw_value = std::any_cast<float>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniform1f(loc, raw_value);
+  }
+}
+
 void Material::UpdateShaderUniforms(Transform* t) {
   int loc = shader->GetUniformLocation("phong_exponent");
   if (loc >= 0) glUniform1f(loc, phong_exponent);
   loc = shader->GetUniformLocation("albedo");
   if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(albedo));
+
+  if (textures.size() > 0 && use_standard_shader) {
+    auto tex = textures[0];
+    loc = shader->GetUniformLocation("texture0");
+    if (loc >= 0) {
+      shader->SetUniformValues("texture0", 1);
+      glActiveTexture(GL_TEXTURE0 + 1);
+      glBindTexture(GL_TEXTURE_2D, tex->texture_id);
+    } else {
+    }
+  }
+
+  auto it = properties_.begin();
+  while (it != properties_.end()) {
+    UpdateShaderProperty(shader, it->first, it->second);
+    it++;
+  }
 
   shader->InitMatrixUniforms(t);
 }

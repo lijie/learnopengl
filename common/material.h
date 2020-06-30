@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <any>
+#include <map>
 
 #include "lo_common.h"
 #include "shader.h"
@@ -69,6 +71,7 @@ class Material {
   // std::vector<texture_t> height_textures;
   // Vec3 colors[MATERIAL_COLOR_NUM];
   Vec3 albedo;
+  bool use_standard_shader = false;
 
   template<typename T>
   void SetCustmoProperty(std::string& name, T value) {
@@ -79,8 +82,13 @@ class Material {
 
   void UseShader(Transform* t);
 
+  void SetProperty(const std::string& name, const std::any& value) {
+    properties_[name] = value;
+  }
+
  private:
   void UpdateShaderUniforms(Transform* t);
+  std::map<std::string, std::any> properties_;
 
   // static void Init();
   // static material_t FindMaterial(const std::string& name);

@@ -170,8 +170,9 @@ int Shader::GetUniformLocation(const char *name) {
 }
 
 void Shader::InitMatrixUniforms(Transform *transform) {
-  glm::mat4 model = glm::mat4(1.0);
+  glm::mat4 model = transform->model();
 
+#if 0
   if (transform->has_model()) {
     model = transform->model();
   } else {
@@ -184,6 +185,7 @@ void Shader::InitMatrixUniforms(Transform *transform) {
     // model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f,
     // 0.5f)); model = glm::translate(model, cube_positions[i]);
   }
+#endif
 
   auto view = GetWorld()->GetCamera()->GetViewMatrix();
   auto projection = GetWorld()->GetCamera()->GetProjectionMatrix();
