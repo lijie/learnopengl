@@ -167,7 +167,7 @@ static void init_grass(GlContext *c) {
   position_vec.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
 
   for (int i = 0; i < position_vec.size(); i++) {
-      auto plane = make_shared<Plane>();
+      auto plane = make_shared<Quad>();
       auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
       mat->textures.push_back(Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex));
       mat->albedo = Vec3(1, 1, 1);
@@ -175,8 +175,8 @@ static void init_grass(GlContext *c) {
       mat->SetProperty("transparent_threshold", 0.0f);
       plane->set_material(mat);
       plane->Translate(position_vec[i]);
-      plane->set_roatation(Vec3(-90, 0, 0));
-      plane->set_scale(Vec3(0.1, 0.1, 0.1));
+      // plane->set_roatation(Vec3(-90, 0, 0));
+      // plane->set_scale(Vec3(0.1, 0.1, 0.1));
       GetWorld()->AddRenderer(plane);
   }
 }

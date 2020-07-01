@@ -4,7 +4,7 @@ project(learnopengl)
 set(common_files common/shader.cc common/camera.cc src/glad.c common/lo_common.cc common/shape.cc common/material.cc common/model.cc common/mesh.cc common/scene.cc)
 
 set(dep_libs_win opengl32 legacy_stdio_definitions)
-set(dep_libs_linux GL dl m)
+set(dep_libs_linux GL dl m assimp)
 
 include_directories(${CMAKE_SOURCE_DIR}/deps/glm-0.9.9.9)
 include_directories(${CMAKE_SOURCE_DIR}/deps/assimp/include)
@@ -20,7 +20,8 @@ if (WIN32)
 	set(dep_libs ${dep_libs_win} assimp)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /std:c++17")
 else ()
-	set(dep_libs ${dep_libs_linux})
+  set(dep_libs ${dep_libs_linux})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif (WIN32)
 
 add_executable(hello_window hello_window/hello_window.cc ${common_files})

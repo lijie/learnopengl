@@ -75,7 +75,6 @@ class Plane : public Shape {
 class Quad : public Shape {
  public:
   Quad();
-  void Submit() override;
 };
 
 class LightSource : public Cube {
