@@ -1,8 +1,8 @@
 #ifndef __LEARNOPENGL_COMMON_SHAPE_H__
 #define __LEARNOPENGL_COMMON_SHAPE_H__
 
-#include <memory>
 #include <functional>
+#include <memory>
 
 #include "lo_common.h"
 #include "renderer.h"
@@ -35,14 +35,15 @@ class Shape : public Renderer, public Transform {
   Vec3 color() { return albedo_; }
 
   void set_stencil_mask(uint8_t mask) { stencil_mask_ = mask; }
-  void set_render_callback(std::function<void(void)> before, std::function<void(void)> after) {
+  void set_render_callback(std::function<void(void)> before,
+                           std::function<void(void)> after) {
     before_render_func_ = before;
     after_render_func_ = after;
   }
 
   void Render(GlContext *ctx) override;
 
-  virtual void Submit() = 0;
+  virtual void Submit();
 
  protected:
   float *vertices_ = nullptr;
@@ -68,6 +69,12 @@ class Cube : public Shape {
 class Plane : public Shape {
  public:
   Plane();
+  void Submit() override;
+};
+
+class Quad : public Shape {
+ public:
+  Quad();
   void Submit() override;
 };
 
