@@ -1,11 +1,11 @@
 #ifndef __LEARNOPENGL_COMMON_MATERIAL_H__
 #define __LEARNOPENGL_COMMON_MATERIAL_H__
 
+#include <any>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <any>
-#include <map>
 
 #include "lo_common.h"
 #include "shader.h"
@@ -52,6 +52,7 @@ class Texture {
 
   static std::shared_ptr<Texture> NewTexture(const std::string&,
                                              TextureType type);
+  static std::shared_ptr<Texture> NewTextureWithTextureId(int tex_id);
 };
 
 typedef std::shared_ptr<Texture> texture_t;
@@ -73,9 +74,8 @@ class Material {
   Vec3 albedo;
   bool use_standard_shader = false;
 
-  template<typename T>
-  void SetCustmoProperty(std::string& name, T value) {
-  }
+  template <typename T>
+  void SetCustmoProperty(std::string& name, T value) {}
 
   // deprecated
   int texture_id[MATERIAL_TEXTURE_NUM];

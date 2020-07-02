@@ -66,7 +66,7 @@ void Shape::Submit() {
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // texture coord
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
@@ -143,7 +143,7 @@ void Cube::Submit() {
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // texture coord
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
@@ -187,7 +187,7 @@ void Plane::Submit() {
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // texture coord
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
@@ -196,13 +196,13 @@ void Plane::Submit() {
 
 static float quad_vertices[] = {
   // positions        // normal  // texture Coords
-  0.5f, -0.5f, 0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-  0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+  0.5f, -0.5f, 0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // A
+  0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // B
+  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // C
 
-  0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,
-  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f,
-  -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
+  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, // C
+  -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f, // D
+  0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,  // A
 };
 
 Quad::Quad() {

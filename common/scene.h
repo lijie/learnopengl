@@ -10,6 +10,7 @@
 class Camera;
 class Renderer;
 class Transform;
+class Framebuffer;
 
 class Scene {
  public:
@@ -35,15 +36,15 @@ class Scene {
     }
   }
 
-  void Render(GlContext *ctx);
+  void Render(GlContext *ctx, std::shared_ptr<Framebuffer> target_buffer = nullptr);
 
  private:
   Camera *camera_;
 
   std::list<std::shared_ptr<Renderer>> renderer_list_;
-  std::list<std::shared_ptr<Renderer>> renderer_list1_;
-  std::list<std::shared_ptr<Renderer>> renderer_list2_;
   std::shared_ptr<LightSource> light_source_;
   std::shared_ptr<Transform> target_ = nullptr;
+
+  void SortRenderer();
 };
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

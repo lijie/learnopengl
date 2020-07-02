@@ -2,14 +2,11 @@
 #define __LEARNOPENGL_COMMON_FRAMBUFFER_H__
 
 #include <stdio.h>
-#include <GLFW/glfw3.h>
-
-#include "glad/glad.h"
 
 class Framebuffer {
  public:
   Framebuffer(int width, int height) {
-    GLint save_id;
+    int save_id;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &save_id);
 
     glGenFramebuffers(1, &framebuffer_id_);
@@ -38,20 +35,22 @@ class Framebuffer {
     glBindFramebuffer(GL_FRAMEBUFFER, save_id);
   }
 
-  GLuint GetTextureId() { return texture_buffer_id_; }
+  int GetTextureId() { return texture_buffer_id_; }
 
-  GLint Enable() {
-    GLint save_id;
+  void Enable() {
+    int save_id;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &save_id);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id_);
+    last_framebuffer_id_ = save_id;
   }
 
-  void Disable(GLint id) {
-    glBindFramebuffer(GL_FRAMEBUFFER, id);
+  void Disable() {
+    glBindFramebuffer(GL_FRAMEBUFFER, last_framebuffer_id_);
   }
 
  private:
-  GLuint framebuffer_id_, texture_buffer_id_, render_buffer_id_;
+  unsigned int framebuffer_id_, texture_buffer_id_, render_buffer_id_;
+  int last_framebuffer_id_ = 0;
 };
 
 #endif  // __LEARNOPENGL_COMMON_FRAMBUFFER_H__

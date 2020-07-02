@@ -7,7 +7,7 @@
 #include "shader.h"
 #include "context.h"
 
-#define STB_IMAGE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 static const char * vertex_shader_path = "../texture/vertex.glsl";
@@ -58,9 +58,22 @@ static void draw(GlContext *c)
 	glBindTexture(GL_TEXTURE_2D, c->texture_ids[0]);
         c->shader->Use();
 	glBindVertexArray(c->vao);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+static float vertices[] = {
+  // positions        // normal  // texture Coords
+  0.5f, -0.5f, 0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // A
+  0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // B
+  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // C
+
+  -0.5f, 0.5f,  0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, // C
+  -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f, // D
+  0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,  // A
+};
+
+#if 0
 float vertices[] = {
 //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
 	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,    // 左上
@@ -68,6 +81,7 @@ float vertices[] = {
     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
      0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
 };
+#endif
 
 static void reset_vertices_with_image(struct image_data *image, float *vertices)
 {
@@ -103,7 +117,7 @@ static void init_vertices(GlContext *c, struct image_data *image)
 		0, 2, 3,
 	};
 
-	reset_vertices_with_image(image, vertices);
+	// reset_vertices_with_image(image, vertices);
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);

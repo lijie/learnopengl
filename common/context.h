@@ -16,7 +16,7 @@ class GlContext {
   uint32_t ebo = 0;
   Shader *shader = nullptr;
 #define TEXTURE_ID_NR 16
-  texture_t texture_ids[TEXTURE_ID_NR];
+  int texture_ids[TEXTURE_ID_NR];
 };
 
 #endif

@@ -16,6 +16,7 @@
 #include "shape.h"
 #include "model.h"
 #include "scene.h"
+#include "framebuffer.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -160,7 +161,7 @@ static void init_cube2(GlContext *c) {
 static void init_grass(GlContext *c) {
   std::vector<glm::vec3> position_vec;
   // position_vec.push_back(glm::vec3(0, 1, 0));
-  position_vec.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
+  // position_vec.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
   position_vec.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
   position_vec.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
   position_vec.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
@@ -181,6 +182,33 @@ static void init_grass(GlContext *c) {
   }
 }
 
+static void init_quad_texture(GlContext *c, int tex_id) {
+  std::vector<glm::vec3> position_vec;
+  // position_vec.push_back(glm::vec3(0, 1, 0));
+  position_vec.push_back(glm::vec3(-1.5f, 2.0f, -0.48f));
+
+  for (int i = 0; i < position_vec.size(); i++) {
+      auto quad = make_shared<Quad>();
+      auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
+      mat->textures.push_back(Texture::NewTextureWithTextureId(tex_id));
+      mat->albedo = Vec3(1, 1, 1);
+      mat->use_standard_shader = true;
+      mat->SetProperty("transparent_threshold", 0.0f);
+      quad->set_material(mat);
+      quad->Translate(position_vec[i]);
+      // quad->set_roatation(Vec3(-90, 0, 0));
+      // quad->set_scale(Vec3(0.1, 0.1, 0.1));
+      GetWorld()->AddRenderer(quad);
+  }
+}
+
+static void add_render_objects(GlContext *c) {
+  init_plane(c);
+  init_cube1(c);
+  init_cube2(c);
+  init_grass(c);
+}
+
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
@@ -195,38 +223,30 @@ static void init_scene(GlContext *c) {
   light_source->Translate(Vec3(0, 5, 0));
   light_source->set_power(500);
 
-  // init_model(c);
-  init_plane(c);
-  init_cube1(c);
-  init_cube2(c);
-  init_grass(c);
+  add_render_objects(c);
 }
 
-static void init_framebuffer(GlContext *c) {
-  GLuint fbid;
-  glGenFramebuffers(1, &fbid);
-  glBindFramebuffer(GL_FRAMEBUFFER, fbid);
-
-  GLuint tex_buffer_id;
-  glGenTextures(1, &tex_buffer_id);
-  glBindTexture(GL_TEXTURE_2D, tex_buffer_id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_buffer_id, 0);
-
-  GLuint rbo;
-  glGenRenderbuffers(1, &rbo);
-  glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-
+static bool draw_once = false;
+static shared_ptr<Framebuffer> framebuffer = nullptr;
 static void draw(GlContext *c) {
-  GetWorld()->Render(c);
+  if (!draw_once) {
+    // glDisable(GL_DEPTH_TEST);
+    framebuffer = make_shared<Framebuffer>(screen_width, screen_height);
+
+    // first, reander to target buffer
+    GetWorld()->Render(c, framebuffer);
+
+    // save framebuffer to tex
+    auto tex_id = framebuffer->GetTextureId();
+
+    // reander tex to quad
+    init_quad_texture(c, tex_id);
+
+    draw_once = true;
+    // glEnable(GL_DEPTH_TEST);
+  } else {
+    GetWorld()->Render(c);
+  }
 }
 
 static void release_resource(GlContext *c) {

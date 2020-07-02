@@ -92,6 +92,12 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
   return tex;
 }
 
+std::shared_ptr<Texture> Texture::NewTextureWithTextureId(int tex_id) {
+  texture_t tex = std::make_shared<Texture>();
+  tex->texture_id = tex_id;
+  return tex;
+}
+
 Material::Material(const std::string& shader_path) {
   this->shader = Shader::NewShader(shader_path);
   assert(this->shader != nullptr);
