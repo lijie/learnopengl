@@ -75,7 +75,10 @@ class Material {
   bool use_standard_shader = false;
 
   template <typename T>
-  void SetCustmoProperty(std::string& name, T value) {}
+  void SetProperty(std::string& name, T value) {
+    std::any holder = value;
+    properties_[name] = holder;
+  }
 
   // deprecated
   int texture_id[MATERIAL_TEXTURE_NUM];

@@ -10,10 +10,12 @@
 #include "context.h"
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include "lo_common.h"
 #include "shader.h"
 #include "material.h"
 #include "camera.h"
 #include "shape.h"
+#include "scene.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

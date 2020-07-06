@@ -109,6 +109,18 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader, const std::string na
     auto raw_value = std::any_cast<float>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform1f(loc, raw_value);
+  } else if (value.type() == typeid(glm::vec3)) {
+    auto raw_value = std::any_cast<glm::vec3>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
+  } else if (value.type() == typeid(glm::mat4)) {
+    auto raw_value = std::any_cast<glm::mat4>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+  } else if (value.type() == typeid(glm::mat3)) {
+    auto raw_value = std::any_cast<glm::mat3>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
   }
 }
 

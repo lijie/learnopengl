@@ -81,7 +81,7 @@ void test_move(double dt) {
   light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
   light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
 
-  transform->set_model(light_source_model);
+  // transform->set_model(light_source_model);
 }
 
 static void process_input(GLFWwindow *window) {

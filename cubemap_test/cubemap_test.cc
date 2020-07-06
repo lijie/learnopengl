@@ -16,6 +16,8 @@
 #include "shape.h"
 #include "model.h"
 #include "scene.h"
+#include "framebuffer.h"
+#include "cubemap.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -74,12 +76,12 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 }
 
 void test_move(double dt) {
-  auto transform = GetWorld()->GetLightSource();
-  auto p = transform->position();
+  // auto transform = GetWorld()->GetLightSource();
+  // auto p = transform->position();
 
-  light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
-  light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
-  light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
+  // light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
 
   // transform->set_model(light_source_model);
 }
@@ -113,11 +115,112 @@ glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
 static void init_model(GlContext *c) {
   auto model = std::make_shared<Model>();
-    // std::string path = "../models/nanosuit/nanosuit.obj";
-    std::string path = "../models/backpack/backpack.obj";
+    std::string path = "../models/nanosuit/nanosuit.obj";
+    // std::string path = "../models/backpack/backpack.obj";
     model->Load(path, false);
     GetWorld()->AddRenderer(model);
     // GetWorld()->SetTarget(model);
+}
+
+static void init_plane(GlContext *c) {
+  auto plane = make_shared<Plane>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.2, 0.2, 0.2);
+  plane->set_material(mat);
+  plane->Translate(Vec3(0, -0.5, 0));
+  GetWorld()->AddRenderer(plane);
+}
+
+static void init_cube1(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.6, 0.2, 0.2);
+  cube->set_material(mat);
+  cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
+  GetWorld()->AddRenderer(cube);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+  }, nullptr);
+}
+
+static void init_cube2(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/single_color");
+  mat->albedo = Vec3(0.2, 0.2, 0.8);
+  cube->set_material(mat);
+  cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
+  GetWorld()->AddRenderer(cube);
+
+  cube->set_render_callback([]() {
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+  }, nullptr);
+}
+
+static void init_grass(GlContext *c) {
+  std::vector<glm::vec3> position_vec;
+  // position_vec.push_back(glm::vec3(0, 1, 0));
+  // position_vec.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
+  position_vec.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
+  position_vec.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+  position_vec.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+  position_vec.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
+
+  for (int i = 0; i < position_vec.size(); i++) {
+      auto plane = make_shared<Quad>();
+      auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
+      mat->textures.push_back(Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex));
+      mat->albedo = Vec3(1, 1, 1);
+      mat->use_standard_shader = true;
+      mat->SetProperty("transparent_threshold", 0.0f);
+      plane->set_material(mat);
+      plane->Translate(position_vec[i]);
+      // plane->set_roatation(Vec3(-90, 0, 0));
+      // plane->set_scale(Vec3(0.1, 0.1, 0.1));
+      GetWorld()->AddRenderer(plane);
+  }
+}
+
+static void init_quad_texture(GlContext *c, int tex_id) {
+  std::vector<glm::vec3> position_vec;
+  // position_vec.push_back(glm::vec3(0, 1, 0));
+  position_vec.push_back(glm::vec3(-1.5f, 2.0f, -0.48f));
+
+  for (int i = 0; i < position_vec.size(); i++) {
+      auto quad = make_shared<Quad>();
+      auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
+      mat->textures.push_back(Texture::NewTextureWithTextureId(tex_id));
+      mat->albedo = Vec3(1, 1, 1);
+      mat->use_standard_shader = true;
+      mat->SetProperty("transparent_threshold", 0.0f);
+      quad->set_material(mat);
+      quad->Translate(position_vec[i]);
+      // quad->set_roatation(Vec3(-90, 0, 0));
+      // quad->set_scale(Vec3(0.1, 0.1, 0.1));
+      GetWorld()->AddRenderer(quad);
+  }
+}
+
+static void init_skybox(GlContext *c) {
+  std::vector<std::string> path_list = {
+    "../texture/skybox/right.jpg",
+    "../texture/skybox/left.jpg",
+    "../texture/skybox/top.jpg",
+    "../texture/skybox/bottom.jpg",
+    "../texture/skybox/front.jpg",
+    "../texture/skybox/back.jpg",
+  };
+
+  CubeMap skybox(path_list);
+}
+
+static void add_render_objects(GlContext *c) {
+  init_plane(c);
+  init_cube1(c);
+  init_cube2(c);
+  init_grass(c);
 }
 
 static void init_scene(GlContext *c) {
@@ -131,14 +234,33 @@ static void init_scene(GlContext *c) {
 
   // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
   // light_source->set_model(light_source_model);
-  light_source->Translate(Vec3(10, 10, 10));
-  light_source->set_power(600);
+  light_source->Translate(Vec3(0, 5, 0));
+  light_source->set_power(500);
 
-  init_model(c);
+  add_render_objects(c);
 }
 
+static bool draw_once = false;
+static shared_ptr<Framebuffer> framebuffer = nullptr;
 static void draw(GlContext *c) {
-  GetWorld()->Render(c);
+  if (!draw_once) {
+    // glDisable(GL_DEPTH_TEST);
+    framebuffer = make_shared<Framebuffer>(screen_width, screen_height);
+
+    // first, reander to target buffer
+    GetWorld()->Render(c, framebuffer);
+
+    // save framebuffer to tex
+    auto tex_id = framebuffer->GetTextureId();
+
+    // reander tex to quad
+    init_quad_texture(c, tex_id);
+
+    draw_once = true;
+    // glEnable(GL_DEPTH_TEST);
+  } else {
+    GetWorld()->Render(c);
+  }
 }
 
 static void release_resource(GlContext *c) {
@@ -175,6 +297,13 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
+  glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   while (!glfwWindowShouldClose(window)) {
     last_frame_time = current_frame_time;
     current_frame_time = glfwGetTime();
@@ -182,7 +311,7 @@ int main() {
     process_input(window);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     draw(context);
 
