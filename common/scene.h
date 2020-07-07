@@ -46,5 +46,6 @@ class Scene {
   std::shared_ptr<Transform> target_ = nullptr;
 
   void SortRenderer();
+  void UpdateMaterialProperties(std::shared_ptr<Renderer> renderer);
 };
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

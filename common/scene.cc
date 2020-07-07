@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 #include "framebuffer.h"
 #include "renderer.h"
+#include "camera.h"
+#include "material.h"
 
 class RendererCompare {
  public:
@@ -24,6 +26,37 @@ void Scene::SortRenderer() {
   });
 }
 
+void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
+  glm::mat4 model = renderer->model();
+
+  auto view = GetCamera()->GetViewMatrix();
+  auto projection = GetCamera()->GetProjectionMatrix();
+  auto mvp = projection * view * model;
+  auto mv3x3 = glm::mat3(view * model);
+  auto normal_model = glm::mat3(glm::transpose(glm::inverse(model)));
+
+  auto material = renderer->material();
+  material->SetProperty("model", model);
+  material->SetProperty("view", view);
+  material->SetProperty("projection", projection);
+  material->SetProperty("mvp", mvp);
+  material->SetProperty("mv3x3", mv3x3);
+  material->SetProperty("normal_model", normal_model);
+
+  auto light_source = GetLightSource();
+  auto light_position = light_source->position();
+  material->SetProperty("light_position", light_position);
+
+  auto light_power = light_source->power();
+  material->SetProperty("light_power", light_power);
+
+  auto light_color = light_source->color();
+  material->SetProperty("light_color", light_color);
+
+  auto camera_position = GetWorld()->GetCamera()->position();
+  material->SetProperty("camera_position", camera_position);
+}
+
 void Scene::Render(GlContext* ctx, std::shared_ptr<Framebuffer> target_buffer) {
   SortRenderer();
 
@@ -34,7 +67,8 @@ void Scene::Render(GlContext* ctx, std::shared_ptr<Framebuffer> target_buffer) {
   auto it = renderer_list_.begin();
   while (it != renderer_list_.end()) {
     // fprintf(stdout, "render object.\n");
-    (*it)->Render(ctx);
+    UpdateMaterialProperties(*it);
+    (*it)->Update(0);
     it++;
   }
   if (target_buffer != nullptr) {

@@ -17,7 +17,8 @@ class Model : public Renderer {
   bool Load(const std::string &path, bool gamma = false);
   std::vector<Mesh *> meshes;
 
-  void Render(GlContext *c) override;
+  void Render() override;
+  void Submit() override {}
 
  private:
   std::string directory_;

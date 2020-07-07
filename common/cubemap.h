@@ -17,12 +17,9 @@ class CubeMap : public Renderer {
 
   void Render(GlContext *c) override;
 
-  void set_material(std::shared_ptr<Material> m) { material_ = m; }
-
  private:
   int texture_id_;
   unsigned int vao, vbo, ebo;
-  std::shared_ptr<Material> material_ = nullptr;
 
   void Submit();
 };

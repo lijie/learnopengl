@@ -11,10 +11,34 @@
 class Material;
 class GlContext;
 
-class Shape : public Renderer, public Transform {
+struct VAOAttr {
+  int size;
+  int type;
+  int normalize;
+  size_t stride;
+  size_t offset;
+
+  VAOAttr() {}
+
+  VAOAttr(int size_, int type_, int normalize_, size_t stride_, size_t offset_) {
+    Reset(size_, type_, normalize_, stride_, offset_);
+  }
+
+  void Reset(int size_, int type_, int normalize_, size_t stride_, size_t offset_) {
+    size = size_;
+    type = type_;
+    normalize = normalize_;
+    stride = stride_;
+    offset = offset_;
+  }
+};
+
+class Shape : public Renderer {
  public:
   Shape();
-  Shape(shared_ptr<Material> mat) { material_ = mat; }
+  Shape(shared_ptr<Material> mat) {
+    set_material(mat);
+  }
   ~Shape();
   float *vertices() { return vertices_; }
   int vertex_size() { return vertex_size_; }
@@ -22,8 +46,6 @@ class Shape : public Renderer, public Transform {
     vertices_ = v;
     vertex_size_ = n;
   }
-
-  void set_material(std::shared_ptr<Material> m) { material_ = m; }
 
   void Translate(const Vec3 &v);
   void Scale(const Vec3 &v);
@@ -41,9 +63,13 @@ class Shape : public Renderer, public Transform {
     after_render_func_ = after;
   }
 
-  void Render(GlContext *ctx) override;
+  void append_vao_attr(const VAOAttr& attr) {
+    vao_attr_vec_.push_back(attr);
+  }
 
-  virtual void Submit();
+  void Render() override;
+  void Submit() override;
+  void Cleanup() override;
 
  protected:
   float *vertices_ = nullptr;
@@ -54,7 +80,8 @@ class Shape : public Renderer, public Transform {
   unsigned int vao, vbo, ebo;
   uint8_t stencil_mask_ = 0x00;
   // Mat4 model_;
-  std::shared_ptr<Material> material_ = nullptr;
+
+  std::vector<VAOAttr> vao_attr_vec_;
 
   std::function<void(void)> before_render_func_ = nullptr;
   std::function<void(void)> after_render_func_ = nullptr;
@@ -63,13 +90,11 @@ class Shape : public Renderer, public Transform {
 class Cube : public Shape {
  public:
   Cube();
-  void Submit() override;
 };
 
 class Plane : public Shape {
  public:
   Plane();
-  void Submit() override;
 };
 
 class Quad : public Shape {

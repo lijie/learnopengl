@@ -21,9 +21,10 @@ bool Model::Load(const std::string &path, bool gamma) {
   return true;
 }
 
-void Model::Render(GlContext *c) {
+void Model::Render() {
   for (auto i = 0; i < meshes.size(); i++) {
-    meshes[i]->Render(c);
+    meshes[i]->Submit();
+    meshes[i]->Render();
   }
 }
 
@@ -133,7 +134,7 @@ Mesh *Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 
   // return a mesh object created from the extracted mesh data
   // return new Mesh(vertices, indices, textures);
-  _mesh->material = _material;
+  _mesh->set_material(_material);
 
   return _mesh;
 }

@@ -123,7 +123,7 @@ static void init_model(GlContext *c) {
 static void init_plane(GlContext *c) {
   auto plane = make_shared<Plane>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.2);
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.2));
   plane->set_material(mat);
   plane->Translate(Vec3(0, -0.5, 0));
   GetWorld()->AddRenderer(plane);
@@ -132,7 +132,7 @@ static void init_plane(GlContext *c) {
 static void init_cube1(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.6, 0.2, 0.2);
+  mat->SetProperty("albedo", Vec3(0.6, 0.2, 0.2));
   cube->set_material(mat);
   cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
   GetWorld()->AddRenderer(cube);
@@ -146,7 +146,7 @@ static void init_cube1(GlContext *c) {
 static void init_cube2(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.8);
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.8));
   cube->set_material(mat);
   cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
   GetWorld()->AddRenderer(cube);
@@ -169,9 +169,9 @@ static void init_grass(GlContext *c) {
   for (int i = 0; i < position_vec.size(); i++) {
       auto plane = make_shared<Plane>();
       auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
-      mat->textures.push_back(Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex));
-      mat->albedo = Vec3(1, 1, 1);
-      mat->use_standard_shader = true;
+      auto tex = Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex);
+      mat->SetProperty("texture0", tex);
+      mat->SetProperty("albedo", Vec3(1, 1, 1));
       mat->SetProperty("transparent_threshold", 0.0f);
       plane->set_material(mat);
       plane->Translate(position_vec[i]);

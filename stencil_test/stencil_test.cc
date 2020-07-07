@@ -123,7 +123,7 @@ static void init_model(GlContext *c) {
 static void init_plane(GlContext *c) {
   auto plane = make_shared<Plane>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.2);
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.2));
   plane->set_material(mat);
   GetWorld()->AddRenderer(plane);
 }
@@ -131,7 +131,7 @@ static void init_plane(GlContext *c) {
 static void init_cube1(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.6, 0.2, 0.2);
+  mat->SetProperty("albedo", Vec3(0.6, 0.2, 0.2));
   cube->set_material(mat);
   cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
   GetWorld()->AddRenderer(cube);
@@ -145,7 +145,7 @@ static void init_cube1(GlContext *c) {
 static void init_cube2(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.8);
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.8));
   cube->set_material(mat);
   cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
   GetWorld()->AddRenderer(cube);
@@ -159,7 +159,7 @@ static void init_cube2(GlContext *c) {
 static void init_cube3(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/simple_nolight");
-  mat->albedo = Vec3(0.2, 1, 0.8);
+  mat->SetProperty("albedo", Vec3(0.2, 1, 0.8));
   cube->set_material(mat);
   cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
   cube->Scale(Vec3(1.05, 1.05, 1.05));
@@ -179,7 +179,7 @@ static void init_cube3(GlContext *c) {
 static void init_cube4(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/simple_nolight");
-  mat->albedo = Vec3(0.2, 1, 0.8);
+  mat->SetProperty("albedo", Vec3(0.2, 1, 0.8));
   cube->set_material(mat);
   cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
   cube->Scale(Vec3(1.05, 1.05, 1.05));

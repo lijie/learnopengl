@@ -70,19 +70,14 @@ static void InitShader(GlContext *c, std::shared_ptr<Shader> shader) {
 }
 #endif
 
-void Mesh::Render(GlContext *ctx) {
-  // InitShader(ctx, material->shader);
-  material->UseShader(this);
-
-  Submit();
-
+void Mesh::Render() {
 #if 1
   int diffuse_idx = 0;
   int specular_idx = 0;
   int normal_idx = 0;
   std::string name;
-  for (int i = 0; i < material->textures.size(); i++) {
-    auto tex = material->textures[i];
+  for (int i = 0; i < material_->textures.size(); i++) {
+    auto tex = material_->textures[i];
     if (tex->type == kDiffuseTex) {
       name = "diffuseTexture" + std::to_string(diffuse_idx);
       diffuse_idx++;
@@ -95,7 +90,7 @@ void Mesh::Render(GlContext *ctx) {
     } else {
       assert(0);
     }
-    if (material->shader->SetUniformValues(name.c_str(), i) >= 0) {
+    if (material_->shader->SetUniformValues(name.c_str(), i) >= 0) {
       glActiveTexture(GL_TEXTURE0 + i);
       glBindTexture(GL_TEXTURE_2D, tex->texture_id);
     } else {
@@ -113,6 +108,7 @@ void Mesh::Render(GlContext *ctx) {
 
 // Submit data to GPU
 void Mesh::Submit() {
+  material_->UseShader(this);
   // if (submit_done_) return;
   glBindVertexArray(vao);
   // load data into vertex buffers

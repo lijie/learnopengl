@@ -103,8 +103,11 @@ Material::Material(const std::string& shader_path) {
   assert(this->shader != nullptr);
 }
 
-static void UpdateShaderProperty(shared_ptr<Shader> shader, const std::string name, const std::any& value) {
+static void UpdateShaderProperty(shared_ptr<Shader> shader,
+                                 const std::string name,
+                                 const std::any& value) {
   int loc;
+  int texteure_unit_index = 0;
   if (value.type() == typeid(float)) {
     auto raw_value = std::any_cast<float>(value);
     loc = shader->GetUniformLocation(name.c_str());
@@ -116,38 +119,34 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader, const std::string na
   } else if (value.type() == typeid(glm::mat4)) {
     auto raw_value = std::any_cast<glm::mat4>(value);
     loc = shader->GetUniformLocation(name.c_str());
-    if (loc >= 0) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+    if (loc >= 0)
+      glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
   } else if (value.type() == typeid(glm::mat3)) {
     auto raw_value = std::any_cast<glm::mat3>(value);
     loc = shader->GetUniformLocation(name.c_str());
-    if (loc >= 0) glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+    if (loc >= 0)
+      glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+  } else if (value.type() == typeid(std::shared_ptr<Texture>)) {
+    auto raw_value = std::any_cast<std::shared_ptr<Texture>>(value);
+    if (shader->SetUniformValues(name.c_str(), texteure_unit_index) >= 0) {
+      glActiveTexture(GL_TEXTURE0 + texteure_unit_index);
+      glBindTexture(GL_TEXTURE_2D, raw_value->texture_id);
+      texteure_unit_index++;
+    }
+  } else {
+    assert(0);
   }
 }
 
 void Material::UpdateShaderUniforms(Transform* t) {
-  int loc = shader->GetUniformLocation("phong_exponent");
-  if (loc >= 0) glUniform1f(loc, phong_exponent);
-  loc = shader->GetUniformLocation("albedo");
-  if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(albedo));
-
-  if (textures.size() > 0 && use_standard_shader) {
-    auto tex = textures[0];
-    loc = shader->GetUniformLocation("texture0");
-    if (loc >= 0) {
-      shader->SetUniformValues("texture0", 1);
-      glActiveTexture(GL_TEXTURE0 + 1);
-      glBindTexture(GL_TEXTURE_2D, tex->texture_id);
-    } else {
-    }
-  }
+  // TODO...
+  SetProperty("phong_exponent", 5.0f);
 
   auto it = properties_.begin();
   while (it != properties_.end()) {
     UpdateShaderProperty(shader, it->first, it->second);
     it++;
   }
-
-  shader->InitMatrixUniforms(t);
 }
 
 void Material::UseShader(Transform* t) {

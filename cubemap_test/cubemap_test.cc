@@ -171,9 +171,10 @@ static void init_grass(GlContext *c) {
   for (int i = 0; i < position_vec.size(); i++) {
       auto plane = make_shared<Quad>();
       auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
-      mat->textures.push_back(Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex));
-      mat->albedo = Vec3(1, 1, 1);
-      mat->use_standard_shader = true;
+      auto tex = Texture::NewTexture("../texture/blending_transparent_window.png", kMainTex);
+
+      mat->SetProperty("texture0", tex);
+      mat->SetProperty("albedo", Vec3(1, 1, 1));
       mat->SetProperty("transparent_threshold", 0.0f);
       plane->set_material(mat);
       plane->Translate(position_vec[i]);
@@ -191,9 +192,10 @@ static void init_quad_texture(GlContext *c, int tex_id) {
   for (int i = 0; i < position_vec.size(); i++) {
       auto quad = make_shared<Quad>();
       auto mat = make_shared<Material>("../shaders/simple_nolight_transparent");
-      mat->textures.push_back(Texture::NewTextureWithTextureId(tex_id));
-      mat->albedo = Vec3(1, 1, 1);
-      mat->use_standard_shader = true;
+      auto tex = Texture::NewTextureWithTextureId(tex_id);
+
+      mat->SetProperty("texture0", tex);
+      mat->SetProperty("albedo", Vec3(1, 1, 1));
       mat->SetProperty("transparent_threshold", 0.0f);
       quad->set_material(mat);
       quad->Translate(position_vec[i]);

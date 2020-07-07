@@ -16,22 +16,21 @@ struct Vertex {
   Vec3 Bitangent;
 };
 
-class Mesh : public Renderer, public Transform {
+class Mesh : public Renderer {
  public:
   Mesh();
   ~Mesh();
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
   // std::vector<Texture> textures;
-  std::shared_ptr<Material> material;
+  // std::shared_ptr<Material> material;
 
-  void Render(GlContext *ctx) override;
+  void Render() override;
+  void Submit() override;
 
  private:
   unsigned int vao, vbo, ebo;
   bool submit_done_ = false;
-
-  void Submit();
 };
 
 #endif  // __LEARNOPENGL_COMMON_MESH_H__

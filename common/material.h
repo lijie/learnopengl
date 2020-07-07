@@ -65,14 +65,6 @@ class Material {
   Material(const std::string& shader_path);
   std::shared_ptr<Shader> shader;
   std::vector<texture_t> textures;
-  float phong_exponent = 5;
-  // std::vector<texture_t> diffuse_textures;
-  // std::vector<texture_t> specular_textures;
-  // std::vector<texture_t> normal_textures;
-  // std::vector<texture_t> height_textures;
-  // Vec3 colors[MATERIAL_COLOR_NUM];
-  Vec3 albedo;
-  bool use_standard_shader = false;
 
   template <typename T>
   void SetProperty(std::string& name, T value) {

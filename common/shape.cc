@@ -29,24 +29,14 @@ void Shape::Scale(const Vec3& v) {
   // model_ = glm::scale(model_, v);
 }
 
-void Shape::Render(GlContext* ctx) {
-  // glm::mat4 model = glm::mat4(1.0);
-  // model = glm::translate(model, position_);
-  // model = glm::scale(model, scale_);
-
-  if (before_render_func_ != nullptr)
-    before_render_func_();
-  material_->UseShader(this);
-  Submit();
+void Shape::Render() {
   glBindVertexArray(vao);
-
-  // glStencilMask(stencil_mask_);
   glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
-  if (after_render_func_ != nullptr)
-    after_render_func_();
 }
 
 void Shape::Submit() {
+  material_->UseShader(this);
+
 // if (submit_done_) return;
   glBindVertexArray(vao);
   // load data into vertex buffers
@@ -58,6 +48,13 @@ void Shape::Submit() {
   auto size = vertex_size_ * 8 * sizeof(float);
   glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
 
+  for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
+    const VAOAttr& attr = vao_attr_vec_[i];
+    glVertexAttribPointer(i, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
+    glEnableVertexAttribArray(i);
+  }
+
+#if 0
    // position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
@@ -69,8 +66,17 @@ void Shape::Submit() {
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
+#endif
 
   glBindVertexArray(0);
+
+  if (before_render_func_ != nullptr)
+    before_render_func_();
+}
+
+void Shape::Cleanup() {
+  if (after_render_func_ != nullptr)
+    after_render_func_();
 }
 
 // cube vertices and normal
@@ -119,35 +125,20 @@ static float cube_vertices[] = {
   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 };
 
-Cube::Cube(): Shape() {
-    set_vertices(&cube_vertices[0], 36);
-}
+Cube::Cube() : Shape() {
+  set_vertices(&cube_vertices[0], 36);
 
-void Cube::Submit() {
-  // if (submit_done_) return;
-  glBindVertexArray(vao);
-  // load data into vertex buffers
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  // A great thing about structs is that their memory layout is sequential for
-  // all its items. The effect is that we can simply pass a pointer to the
-  // struct and it translates perfectly to a glm::vec3/2 array which again
-  // translates to 3/2 floats which translates to a byte array.
-  glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), &cube_vertices[0],
-               GL_STATIC_DRAW);
-
-   // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // normal
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  // texture coord
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-
-  glBindVertexArray(0);
+  // set vao attr
+  VAOAttr attr;
+  // pos attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+  vao_attr_vec_.push_back(attr);
+  // normal attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 3 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
+  // texcoord attr
+  attr.Reset(2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 6 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
 }
 
 float plane_vertices[] = {
@@ -164,34 +155,19 @@ float plane_vertices[] = {
 // };
 
 Plane::Plane(): Shape() {
-    set_vertices(&plane_vertices[0], 6);
-}
+  set_vertices(&plane_vertices[0], 6);
 
-void Plane::Submit() {
-  // if (submit_done_) return;
-  glBindVertexArray(vao);
-  // load data into vertex buffers
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  // A great thing about structs is that their memory layout is sequential for
-  // all its items. The effect is that we can simply pass a pointer to the
-  // struct and it translates perfectly to a glm::vec3/2 array which again
-  // translates to 3/2 floats which translates to a byte array.
-  glBufferData(GL_ARRAY_BUFFER, sizeof(plane_vertices), &plane_vertices[0],
-               GL_STATIC_DRAW);
-
-   // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // normal
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  // texture coord
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-
-  glBindVertexArray(0);
+    // set vao attr
+  VAOAttr attr;
+  // pos attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+  vao_attr_vec_.push_back(attr);
+  // normal attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 3 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
+  // texcoord attr
+  attr.Reset(2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 6 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
 }
 
 static float quad_vertices[] = {
@@ -207,6 +183,17 @@ static float quad_vertices[] = {
 
 Quad::Quad() {
   set_vertices(quad_vertices, 6);
+  // set vao attr
+  VAOAttr attr;
+  // pos attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+  vao_attr_vec_.push_back(attr);
+  // normal attr
+  attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 3 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
+  // texcoord attr
+  attr.Reset(2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 6 * sizeof(float));
+  vao_attr_vec_.push_back(attr);
 }
 
 LightSource::LightSource() {
