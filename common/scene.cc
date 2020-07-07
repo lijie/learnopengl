@@ -27,6 +27,12 @@ void Scene::SortRenderer() {
 }
 
 void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
+  auto children = renderer->GetChildren();
+  for (size_t i = 0; i < children.size(); i++) {
+    auto child = children[i];
+    UpdateMaterialProperties(child);
+  }
+
   glm::mat4 model = renderer->model();
 
   auto view = GetCamera()->GetViewMatrix();
@@ -36,6 +42,9 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   auto normal_model = glm::mat3(glm::transpose(glm::inverse(model)));
 
   auto material = renderer->material();
+  if (material == nullptr)
+    return;
+
   material->SetProperty("model", model);
   material->SetProperty("view", view);
   material->SetProperty("projection", projection);

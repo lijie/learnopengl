@@ -22,9 +22,9 @@ bool Model::Load(const std::string &path, bool gamma) {
 }
 
 void Model::Render() {
-  for (auto i = 0; i < meshes.size(); i++) {
-    meshes[i]->Submit();
-    meshes[i]->Render();
+  for (auto i = 0; i < children_.size(); i++) {
+    children_[i]->Submit();
+    children_[i]->Render();
   }
 }
 
@@ -35,7 +35,7 @@ void Model::ProcessNode(aiNode *node, const aiScene *scene) {
     // scene. the scene contains all the data, node is just to keep stuff
     // organized (like relations between nodes).
     aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-    meshes.push_back(ProcessMesh(mesh, scene));
+    children_.push_back(ProcessMesh(mesh, scene));
   }
   // after we've processed all of the meshes (if any) we then recursively
   // process each of the children nodes
@@ -44,8 +44,9 @@ void Model::ProcessNode(aiNode *node, const aiScene *scene) {
   }
 }
 
-Mesh *Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
-  Mesh *_mesh = new Mesh();
+std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
+  // Mesh *_mesh = new Mesh();
+  auto _mesh = make_shared<Mesh>();
   // data to fill
   // std::vector<Vertex> vertices;
   // std::vector<unsigned int> indices;

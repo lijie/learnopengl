@@ -15,7 +15,7 @@ class Model : public Renderer {
  public:
   Model() {}
   bool Load(const std::string &path, bool gamma = false);
-  std::vector<Mesh *> meshes;
+  // std::vector<Mesh *> meshes;
 
   void Render() override;
   void Submit() override {}
@@ -24,7 +24,7 @@ class Model : public Renderer {
   std::string directory_;
 
   void ProcessNode(aiNode *node, const aiScene *scene);
-  Mesh *ProcessMesh(aiMesh *mesh, const aiScene *scene);
+  std::shared_ptr<Mesh> ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
   texture_t LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                  TextureType type_alias);

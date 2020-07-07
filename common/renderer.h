@@ -34,9 +34,14 @@ class Renderer : public Transform {
   void set_material(std::shared_ptr<Material> m) { material_ = m; }
   std::shared_ptr<Material> material() { return material_; }
 
+  std::vector<std::shared_ptr<Renderer>>& GetChildren() { return children_; }
+
  protected:
   int priority_ = 0;
   std::shared_ptr<Material> material_ = nullptr;
+  // TODO(andrewli):
+  // move to transform...
+  std::vector<std::shared_ptr<Renderer>> children_;
 };
 
 #endif  // __LEARNOPENGL_RENDERER_H__
