@@ -268,6 +268,7 @@ int main() {
   assert(window != NULL);
   glfwMakeContextCurrent(window);
 
+  GlobalStart();
   GlContext *context = new GlContext();
 
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -309,6 +310,7 @@ int main() {
 
   release_resource(context);
   delete context;
+  GlobalFinish();
   glfwTerminate();
   return 0;
 }

@@ -27,7 +27,9 @@ material_t Material::FindMaterial(const std::string& name) {
 
 static std::map<std::string, texture_t> TextureCollections;
 
-Texture::~Texture() { glDeleteTextures(1, (const GLuint*)&texture_id); }
+Texture::~Texture() {
+  glDeleteTextures(1, (const GLuint*)&texture_id);
+}
 
 void Texture::SetupTexture() {
   // check texture id
@@ -156,4 +158,12 @@ void Material::UpdateShaderUniforms(Transform* t) {
 void Material::UseShader(Transform* t) {
   shader->Use();
   UpdateShaderUniforms(t);
+}
+
+void MaterialStart() {
+}
+
+void MaterialFinish() {
+  TextureCollections.clear();
+  MaterialCollections.clear();
 }

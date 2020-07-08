@@ -12,7 +12,6 @@
 #include <GLFW/glfw3.h>
 #include "shader.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 static const char *vertex_shader_path = "../coordinate/vertex.glsl";
@@ -213,6 +212,7 @@ int main() {
   assert(window != NULL);
   glfwMakeContextCurrent(window);
 
+  GlobalStart();
   GlContext *context = new GlContext();
 
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -242,6 +242,7 @@ int main() {
 
   release_resource(context);
   delete context;
+  GlobalFinish();
   glfwTerminate();
   return 0;
 }

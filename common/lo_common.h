@@ -18,5 +18,10 @@ class Scene;
 
 // global function...
 Scene *GetWorld();
+void GlobalStart();
+void GlobalFinish();
+
+void MaterialStart();
+void MaterialFinish();
 
 #endif  // __LEARNOPENGL_LO_COMMON_H__

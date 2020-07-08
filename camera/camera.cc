@@ -14,7 +14,6 @@
 #include "camera.h"
 #include "scene.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 static const char *vertex_shader_path = "../camera/vertex.glsl";
@@ -276,6 +275,7 @@ int main() {
   assert(window != NULL);
   glfwMakeContextCurrent(window);
 
+  GlobalStart();
   GlContext *context = new GlContext();
 
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -310,6 +310,7 @@ int main() {
     glfwPollEvents();
   }
 
+  GlobalFinish();
   release_resource(context);
   delete context;
   glfwTerminate();
