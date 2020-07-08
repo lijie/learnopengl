@@ -6,7 +6,10 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
+#include "lo_common.h"
 #include "material.h"
+#include "scene.h"
+#include "camera.h"
 
 static float skyboxVertices[] = {
         // positions          
@@ -54,10 +57,21 @@ static float skyboxVertices[] = {
     };
 
 CubeMap::CubeMap(const std::vector<std::string> &path) {
+    // init vertices
+    set_vertices(&skyboxVertices[0], 36);
+
+    // set vao attr
+    VAOAttr attr;
+    // pos attr
+    attr.Reset(3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+    vao_attr_vec_.push_back(attr);
+
+    // init textures
     unsigned int tex_id;
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, tex_id);
 
+    stbi_set_flip_vertically_on_load(0);
     int width, height, channel;
     for (size_t i = 0; i < path.size(); i++) {
         uint8_t *data = stbi_load(path[i].c_str(), &width, &height, &channel, 0);
@@ -76,28 +90,18 @@ CubeMap::CubeMap(const std::vector<std::string> &path) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     texture_id_ = tex_id;
-}
 
-int CubeMap::GetTextureId() {
-    return texture_id_;
-}
-
-void CubeMap::Render(GlContext *c) {
-  material_->UseShader(this);
-  Submit();
-  glBindVertexArray(vao);
-
-  // glStencilMask(stencil_mask_);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+    auto tex = Texture::NewTextureWithTextureId(tex_id);
+    tex->is_cube_map = true;
+    // init material
+    auto mat = make_shared<Material>("../shaders/skybox");
+    mat->SetProperty("skybox", tex);
+    set_material(mat);
 }
 
 void CubeMap::Submit() {
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glBindVertexArray(vao);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices,
-               GL_STATIC_DRAW);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glm::mat4 view = glm::mat4(glm::mat3(GetWorld()->GetCamera()->GetViewMatrix()));
+    material_->SetProperty("view", view);
+
+    Shape::Submit();
 }

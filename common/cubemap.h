@@ -5,23 +5,21 @@
 #include <string>
 #include <vector>
 
-#include "renderer.h"
+#include "shape.h"
 
 class Material;
 
-class CubeMap : public Renderer {
+class CubeMap : public Shape {
  public:
   CubeMap() {}
   CubeMap(const std::vector<std::string> &path);
-  int GetTextureId();
 
-  void Render(GlContext *c) override;
+  // void Render() override;
+  void Submit() override;
 
  private:
   int texture_id_;
-  unsigned int vao, vbo, ebo;
-
-  void Submit();
+  unsigned int vao, vbo, ebo;  
 };
 
 #endif  // __LEARNOPENGL_COMMON_CUBEMAP_H__

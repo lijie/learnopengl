@@ -3,6 +3,7 @@
 
 #include <any>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -46,6 +47,7 @@ class Texture {
   int width = 0;
   int height = 0;
   uint8_t* data = nullptr;
+  bool is_cube_map = false;
 
   void SetupTexture();
   void Unbind();
@@ -84,6 +86,7 @@ class Material {
  private:
   void UpdateShaderUniforms(Transform* t);
   std::map<std::string, std::any> properties_;
+  std::unordered_map<std::string, int> valid_properties_;
 
   // static void Init();
   // static material_t FindMaterial(const std::string& name);

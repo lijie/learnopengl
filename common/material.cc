@@ -130,7 +130,11 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
     auto raw_value = std::any_cast<std::shared_ptr<Texture>>(value);
     if (shader->SetUniformValues(name.c_str(), texteure_unit_index) >= 0) {
       glActiveTexture(GL_TEXTURE0 + texteure_unit_index);
-      glBindTexture(GL_TEXTURE_2D, raw_value->texture_id);
+      if (raw_value->is_cube_map) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, raw_value->texture_id);
+      } else {
+        glBindTexture(GL_TEXTURE_2D, raw_value->texture_id);
+      }
       texteure_unit_index++;
     }
   } else {

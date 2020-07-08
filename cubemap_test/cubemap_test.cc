@@ -125,7 +125,8 @@ static void init_model(GlContext *c) {
 static void init_plane(GlContext *c) {
   auto plane = make_shared<Plane>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.2);
+
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.2));
   plane->set_material(mat);
   plane->Translate(Vec3(0, -0.5, 0));
   GetWorld()->AddRenderer(plane);
@@ -134,7 +135,8 @@ static void init_plane(GlContext *c) {
 static void init_cube1(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.6, 0.2, 0.2);
+
+  mat->SetProperty("albedo", Vec3(0.6, 0.2, 0.2));
   cube->set_material(mat);
   cube->Translate(Vec3(-1.0f, 0.0f, -1.0f));
   GetWorld()->AddRenderer(cube);
@@ -148,7 +150,8 @@ static void init_cube1(GlContext *c) {
 static void init_cube2(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = make_shared<Material>("../shaders/single_color");
-  mat->albedo = Vec3(0.2, 0.2, 0.8);
+
+  mat->SetProperty("albedo", Vec3(0.2, 0.2, 0.8));
   cube->set_material(mat);
   cube->Translate(Vec3(2.0f, 0.0f, 0.0f));
   GetWorld()->AddRenderer(cube);
@@ -215,13 +218,21 @@ static void init_skybox(GlContext *c) {
     "../texture/skybox/back.jpg",
   };
 
-  CubeMap skybox(path_list);
+  auto skybox = make_shared<CubeMap>(path_list);
+
+  skybox->set_render_callback([]() {
+    glDepthFunc(GL_LEQUAL);
+  }, []() {
+    glDepthFunc(GL_LESS);
+  });
+  GetWorld()->AddRenderer(skybox);
 }
 
 static void add_render_objects(GlContext *c) {
-  init_plane(c);
+  // init_plane(c);
   init_cube1(c);
   init_cube2(c);
+  init_skybox(c);
   init_grass(c);
 }
 
@@ -245,24 +256,7 @@ static void init_scene(GlContext *c) {
 static bool draw_once = false;
 static shared_ptr<Framebuffer> framebuffer = nullptr;
 static void draw(GlContext *c) {
-  if (!draw_once) {
-    // glDisable(GL_DEPTH_TEST);
-    framebuffer = make_shared<Framebuffer>(screen_width, screen_height);
-
-    // first, reander to target buffer
-    GetWorld()->Render(c, framebuffer);
-
-    // save framebuffer to tex
-    auto tex_id = framebuffer->GetTextureId();
-
-    // reander tex to quad
-    init_quad_texture(c, tex_id);
-
-    draw_once = true;
-    // glEnable(GL_DEPTH_TEST);
-  } else {
-    GetWorld()->Render(c);
-  }
+  GetWorld()->Render(c);
 }
 
 static void release_resource(GlContext *c) {
@@ -312,7 +306,7 @@ int main() {
 
     process_input(window);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     draw(context);
