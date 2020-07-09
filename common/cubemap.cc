@@ -71,7 +71,7 @@ CubeMap::CubeMap(const std::vector<std::string> &path) {
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_CUBE_MAP, tex_id);
 
-    stbi_set_flip_vertically_on_load(0);
+    stbi_set_flip_vertically_on_load(1);
     int width, height, channel;
     for (size_t i = 0; i < path.size(); i++) {
         uint8_t *data = stbi_load(path[i].c_str(), &width, &height, &channel, 0);

@@ -233,7 +233,7 @@ static shared_ptr<Framebuffer> framebuffer = nullptr;
 static void draw(GlContext *c) {
   if (!draw_once) {
     // glDisable(GL_DEPTH_TEST);
-    framebuffer = make_shared<Framebuffer>(screen_width, screen_height);
+    framebuffer = make_shared<Framebuffer>(screen_width, screen_height, 4);
 
     // first, reander to target buffer
     GetWorld()->Render(c, framebuffer);

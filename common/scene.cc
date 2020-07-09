@@ -81,6 +81,7 @@ void Scene::Render(GlContext* ctx, std::shared_ptr<Framebuffer> target_buffer) {
     it++;
   }
   if (target_buffer != nullptr) {
+    target_buffer->Blit();
     target_buffer->Disable();
   }
 }
