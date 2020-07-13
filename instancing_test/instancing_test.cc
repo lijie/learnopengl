@@ -18,6 +18,7 @@
 #include "scene.h"
 #include "framebuffer.h"
 #include "cubemap.h"
+#include "instance_renderer.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -228,12 +229,57 @@ static void init_skybox(GlContext *c) {
   GetWorld()->AddRenderer(skybox);
 }
 
+Mat4 generate_model(float x, float y) {
+    Mat4 model = Mat4(1.0);
+    Mat4 scale_mat = glm::scale(Mat4(1.0), Vec3(0.1, 0.1, 0.1));
+    auto q = glm::qua<float>(glm::radians(Vec3(0, 0, 0)));
+    Mat4 rotate_mat = glm::mat4_cast(q);
+    Mat4 translate_mat = glm::translate(Mat4(1.0), Vec3(x, y, 0));
+
+    // model = glm::mat4_cast(q) * model;
+    // model = glm::translate(model, position_);
+    return translate_mat * rotate_mat * scale_mat * model;
+  }
+
+static void init_quad_groups() {
+    auto mat = make_shared<Material>("../shaders/simple_instance");
+    auto tex = Texture::NewColorTexture(Vec3(255, 255, 255));
+    mat->SetProperty("texture0", tex);
+    mat->SetProperty("albedo", Vec3(1, 1, 1));
+
+    float start_x = -1;
+    float start_y = 1;
+    std::vector<Mat4> model_vec;
+    while (1) {
+      glm::mat4 model = generate_model(start_x, start_y); //glm::mat4(1.0f);
+      model_vec.push_back(model);
+      start_x = start_x + 0.12;
+      if (start_x > 1) {
+        start_x = -1;
+        start_y -= 0.12;
+      }
+      if (start_y < -1) {
+        break;
+      }
+    }
+
+    auto quad = make_shared<Quad>();
+    auto ir = make_shared<InstanceRenderer>(quad, model_vec.size());
+    for (size_t i = 0; i < model_vec.size(); i++) {
+      ir->SetModel(i, model_vec[i]);
+    }
+    ir->set_material(mat);
+    ir->Ready();
+    GetWorld()->AddRenderer(ir);
+}
+
 static void add_render_objects(GlContext *c) {
   // init_plane(c);
-  init_cube1(c);
-  init_cube2(c);
+  // init_cube1(c);
+  // init_cube2(c);
+  init_quad_groups();
   init_skybox(c);
-  init_grass(c);
+  // init_grass(c);
 }
 
 static void init_scene(GlContext *c) {
@@ -242,13 +288,13 @@ static void init_scene(GlContext *c) {
   Camera *camera = new Camera(Vec3(0.0, 0.0, 3.0), Vec3(0, 1, 0), 45.0, (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  auto light_source = std::make_shared<LightSource>();
-  GetWorld()->AddLightSource(light_source);
+  // auto light_source = std::make_shared<LightSource>();
+  // GetWorld()->AddLightSource(light_source);
 
   // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
   // light_source->set_model(light_source_model);
-  light_source->Translate(Vec3(0, 5, 0));
-  light_source->set_power(500);
+  // light_source->Translate(Vec3(0, 5, 0));
+  // light_source->set_power(500);
 
   add_render_objects(c);
 }

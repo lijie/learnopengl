@@ -67,9 +67,9 @@ void Texture::SetupTexture() {
   texture_id = id;
 }
 
-static texture_t GenerateDefaultWhiteTexture() {
+static texture_t GenerateColorTexture(const Vec3& color) {
   texture_t tex = std::make_shared<Texture>();
-  GLubyte data[] = {255, 255, 255, 255};
+  GLubyte data[] = {color.r, color.g, color.b, 255};
   tex->data = data;
   tex->width = 1;
   tex->height = 1;
@@ -98,6 +98,10 @@ std::shared_ptr<Texture> Texture::NewTextureWithTextureId(int tex_id) {
   texture_t tex = std::make_shared<Texture>();
   tex->texture_id = tex_id;
   return tex;
+}
+
+std::shared_ptr<Texture> Texture::NewColorTexture(const Vec3& color) {
+  return GenerateColorTexture(color);
 }
 
 Material::Material(const std::string& shader_path) {

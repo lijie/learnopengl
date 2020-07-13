@@ -55,6 +55,7 @@ class Texture {
   static std::shared_ptr<Texture> NewTexture(const std::string&,
                                              TextureType type);
   static std::shared_ptr<Texture> NewTextureWithTextureId(int tex_id);
+  static std::shared_ptr<Texture> NewColorTexture(const Vec3& color);
 };
 
 typedef std::shared_ptr<Texture> texture_t;

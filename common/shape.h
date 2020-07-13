@@ -18,6 +18,9 @@ struct VAOAttr {
   size_t stride;
   size_t offset;
 
+  int external_vbo;
+  int divisor;
+
   VAOAttr() {}
 
   VAOAttr(int size_, int type_, int normalize_, size_t stride_, size_t offset_) {
@@ -30,6 +33,9 @@ struct VAOAttr {
     normalize = normalize_;
     stride = stride_;
     offset = offset_;
+
+    external_vbo = -1;
+    divisor = 0;
   }
 };
 
@@ -67,9 +73,22 @@ class Shape : public Renderer {
     vao_attr_vec_.push_back(attr);
   }
 
+  size_t vao_attr_size() {
+    return vao_attr_vec_.size();
+  }
+
+  void enable_instance(bool flag, unsigned int num) {
+    enable_instance_ = flag;
+    instance_num_ = num;
+  }
+
   void Render() override;
   void Submit() override;
   void Cleanup() override;
+
+  int vbo() {return vbo_;}
+  int vao() {return vao_;}
+  int ebo() {return ebo_;}
 
  protected:
   float *vertices_ = nullptr;
@@ -77,8 +96,10 @@ class Shape : public Renderer {
   // Vec3 position_;
   // Vec3 scale_;
   Vec3 albedo_;
-  unsigned int vao, vbo, ebo;
+  unsigned int vao_, vbo_, ebo_;
   uint8_t stencil_mask_ = 0x00;
+  bool enable_instance_ = false;
+  unsigned int instance_num_ = 0;
   // Mat4 model_;
 
   std::vector<VAOAttr> vao_attr_vec_;

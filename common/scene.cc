@@ -53,14 +53,16 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   material->SetProperty("normal_model", normal_model);
 
   auto light_source = GetLightSource();
-  auto light_position = light_source->position();
-  material->SetProperty("light_position", light_position);
+  if (light_source != nullptr) {
+    auto light_position = light_source->position();
+    material->SetProperty("light_position", light_position);
 
-  auto light_power = light_source->power();
-  material->SetProperty("light_power", light_power);
+    auto light_power = light_source->power();
+    material->SetProperty("light_power", light_power);
 
-  auto light_color = light_source->color();
-  material->SetProperty("light_color", light_color);
+    auto light_color = light_source->color();
+    material->SetProperty("light_color", light_color);
+  }
 
   auto camera_position = GetWorld()->GetCamera()->position();
   material->SetProperty("camera_position", camera_position);

@@ -4,7 +4,10 @@ project(learnopengl)
 include_directories(${CMAKE_SOURCE_DIR}/deps/glm-0.9.9.9)
 include_directories(${CMAKE_SOURCE_DIR}/deps/assimp/include)
 
-add_library(toy common/shader.cc common/camera.cc src/glad.c common/lo_common.cc common/shape.cc common/material.cc common/model.cc common/mesh.cc common/scene.cc common/cubemap.cc)
+add_library(toy 
+	common/shader.cc common/camera.cc src/glad.c common/lo_common.cc common/shape.cc
+	common/material.cc common/model.cc common/mesh.cc common/scene.cc common/cubemap.cc
+	common/instance_renderer.cc)
 target_include_directories(toy PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/common)
 
 set(dep_libs_win opengl32 legacy_stdio_definitions)

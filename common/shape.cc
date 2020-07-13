@@ -8,15 +8,15 @@
 #include "scene.h"
 
 Shape::Shape() {
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glGenBuffers(1, &ebo);
+  glGenVertexArrays(1, &vao_);
+  glGenBuffers(1, &vbo_);
+  glGenBuffers(1, &ebo_);
 }
 
 Shape::~Shape() {
-  glDeleteVertexArrays(1, &vao);
-  glDeleteBuffers(1, &vbo);
-  glDeleteBuffers(1, &ebo);
+  glDeleteVertexArrays(1, &vao_);
+  glDeleteBuffers(1, &vbo_);
+  glDeleteBuffers(1, &ebo_);
 }
 
 void Shape::Translate(const Vec3& v) {
@@ -30,43 +30,36 @@ void Shape::Scale(const Vec3& v) {
 }
 
 void Shape::Render() {
-  glBindVertexArray(vao);
-  glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
+  glBindVertexArray(vao_);
+  if (enable_instance_) {
+    glDrawArraysInstanced(GL_TRIANGLES, 0, vertex_size_, instance_num_);
+    // glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
+  } else {
+    glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
+  }
 }
 
 void Shape::Submit() {
   material_->UseShader(this);
 
-// if (submit_done_) return;
-  glBindVertexArray(vao);
-  // load data into vertex buffers
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  // A great thing about structs is that their memory layout is sequential for
-  // all its items. The effect is that we can simply pass a pointer to the
-  // struct and it translates perfectly to a glm::vec3/2 array which again
-  // translates to 3/2 floats which translates to a byte array.
+  glBindVertexArray(vao_);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+
   auto size = vertex_size_ * 8 * sizeof(float);
   glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
 
   for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
     const VAOAttr& attr = vao_attr_vec_[i];
+
+    if (attr.external_vbo >= 0) {
+      glBindBuffer(GL_ARRAY_BUFFER, attr.external_vbo);
+    }
     glVertexAttribPointer(i, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
     glEnableVertexAttribArray(i);
+    if (attr.divisor > 0) {
+      glVertexAttribDivisor(i, attr.divisor);
+    }
   }
-
-#if 0
-   // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // normal
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  // texture coord
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-#endif
 
   glBindVertexArray(0);
 
