@@ -25,6 +25,7 @@ uniform mat4 uView;
 uniform mat4 uProjection;
 uniform mat3 uMV3x3;
 uniform mat4 uMVP;
+uniform mat4 uModelView;
 uniform mat3 uNormalMatrix;
 
 #ifdef FLAT_SHADED
@@ -38,7 +39,7 @@ void main()
 
     vUV = aUV;
 
-    vViewPosition = (uView * uModel * vec4(aVertices, 1.0)).xyz;
+    vViewPosition = (uModelView * vec4(aVertices, 1.0)).xyz;
 
     gl_Position = uMVP * vec4(aVertices, 1.0);
 }

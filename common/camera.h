@@ -28,9 +28,10 @@ class Camera {
     Vec3 world_up_;
     Vec3 right_;
     Vec3 front_;
+    Vec3 look_target_;
 
     // 默认情况下, 旋转Y轴 -90, 看向 -Z 方向
-    double yaw_ = -90;
+    double yaw_ = 0;
     double pitch_ = 0;
     double roll_ = 0;
 

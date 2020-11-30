@@ -12,6 +12,8 @@
 #include "material.h"
 #include "glm/gtx/string_cast.hpp"
 
+#include "directional_light.h"
+
 class RendererCompare {
  public:
   bool operator()(const Renderer& r1, const Renderer& r2) const {
@@ -41,7 +43,8 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   // printf("model matrix: %s\n", glm::to_string(model).c_str());
   auto projection = GetCamera()->GetProjectionMatrix();
   auto mvp = projection * view * model;
-  auto mv3x3 = glm::mat3(view * model);
+  auto model_view = view * model;
+  auto mv3x3 = glm::mat3(model_view);
   // printf("mv3x3 matrix: %s\n", glm::to_string(mv3x3).c_str());
   auto normal_model = glm::mat3(glm::transpose(glm::inverse(model)));
   auto normal_matrix = glm::transpose(glm::inverse(mv3x3));
@@ -63,6 +66,7 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   material->SetProperty("uProjection", projection);
   material->SetProperty("uMVP", mvp);
   material->SetProperty("uMV3x3", mv3x3);
+  material->SetProperty("uModelView", model_view);
   material->SetProperty("uNormalMatrix", normal_matrix);
 
   material->SetProperty("uSpecular", Vec3(1.0, 1.0, 1.0));
@@ -72,6 +76,7 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   material->SetProperty("directionalLights[0].direction", mv3x3 * Vec3(0.0, -0.5, -0.5));
   material->SetProperty("directionalLights[0].color", Vec3(1.0, 1.0, 1.0));
 
+#if 0
   auto light_source = GetLightSource();
   if (light_source != nullptr) {
     auto light_position = light_source->position();
@@ -83,6 +88,7 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
     auto light_color = light_source->color();
     material->SetProperty("light_color", light_color);
   }
+#endif
 
   auto camera_position = GetWorld()->GetCamera()->position();
   material->SetProperty("camera_position", camera_position);
@@ -117,4 +123,8 @@ void Scene::MoveTarget(int dir) {
 void Scene::AddRenderer(shared_ptr<Renderer> renderer, int pri) {
   renderer->set_proority(pri);
   renderer_list_.push_back(renderer);
+}
+
+void Scene::AddLight(std::shared_ptr<Light> light) {
+  light_manager_->AddLight(light);
 }

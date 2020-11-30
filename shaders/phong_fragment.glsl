@@ -150,7 +150,7 @@ void main()
     BlinnPhongMaterial material;
     material.diffuseColor = diffuseColor.rgb;
     material.specularColor = uSpecular;
-    material.specularShininess = 8;//uShininess;
+    material.specularShininess = 256;//uShininess;
     material.specularStrength = specularStrength;
     GeometricContext geometry;
     geometry.position = vViewPosition;

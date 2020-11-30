@@ -11,12 +11,12 @@ class Transform {
   Transform() {
     set_position(Vec3(0, 0, 0));
     set_scale(Vec3(1.0, 1.0, 1.0));
-    set_roatation(Vec3(0, 0, 0));
+    set_rotation(Vec3(0, 0, 0));
     model_ = Mat4(1.0);
   }
   void set_position(const Vec3& v) { position_ = v; }
   void set_scale(const Vec3& v) { scale_ = v; }
-  void set_roatation(const Vec3& v) { rotation_ = v; }
+  void set_rotation(const Vec3& v) { rotation_ = v; }
 
   // void add_position(const Vec3& v) { position_ = position_ + v; }
   // void add_scale(const Vec3& v) { scale_ = scale_ + v; }

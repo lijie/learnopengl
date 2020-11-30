@@ -11,6 +11,8 @@ class Camera;
 class Renderer;
 class Transform;
 class Framebuffer;
+class LightManager;
+class Light;
 
 class Scene {
  public:
@@ -18,12 +20,12 @@ class Scene {
   Camera *GetCamera() { return camera_; }
 
   void AddRenderer(std::shared_ptr<Renderer> r, int pri = 0);
-  void AddLightSource(std::shared_ptr<LightSource> ls) {
-    light_source_ = ls;
-    AddRenderer(ls);
-  }
+  // void AddLightSource(std::shared_ptr<LightSource> ls) {
+  //   light_source_ = ls;
+  //   AddRenderer(ls);
+  // }
 
-  std::shared_ptr<LightSource> GetLightSource() { return light_source_; }
+  // std::shared_ptr<LightSource> GetLightSource() { return light_source_; }
 
   void SetTarget(std::shared_ptr<Transform> target) {target_ = target; }
   void MoveTarget(int dir);
@@ -37,12 +39,14 @@ class Scene {
   }
 
   void Render(GlContext *ctx, std::shared_ptr<Framebuffer> target_buffer = nullptr);
+  void AddLight(std::shared_ptr<Light> light);
 
  private:
-  Camera *camera_;
+  Camera *camera_ = nullptr;
+  LightManager *light_manager_ = nullptr;
 
   std::list<std::shared_ptr<Renderer>> renderer_list_;
-  std::shared_ptr<LightSource> light_source_;
+  // std::shared_ptr<LightSource> light_source_;
   std::shared_ptr<Transform> target_ = nullptr;
 
   void SortRenderer();

@@ -136,8 +136,8 @@ bool Shader::CompileAndLink() {
   const char *v_src_ptr = v_src.c_str();
   const char *f_src_ptr = f_src.c_str();
 
-  printf("%s\n", v_src_ptr);
-  printf("%s\n", f_src_ptr);
+  // printf("%s\n", v_src_ptr);
+  // printf("%s\n", f_src_ptr);
 
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &v_src_ptr, NULL);
