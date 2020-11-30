@@ -130,6 +130,9 @@ static void init_cube1(GlContext *c) {
   auto tex = Texture::NewTexture("../texture/tmtjfd0r_2K_Albedo.jpg", kMainTex);
   mat->SetDiffuseTexture(tex);
 
+  auto tex2 = Texture::NewTexture("../texture/tmtjfd0r_2K_Specular.jpg", kMainTex);
+  mat->SetSpecularTexture(tex2);
+
   cube->set_material(mat);
   cube->Translate(Vec3(0.0f, 0.0f, 0.0f));
   GetWorld()->AddRenderer(cube);

@@ -108,9 +108,9 @@ Material::Material(const std::string& shader_path) {
 
 static void UpdateShaderProperty(shared_ptr<Shader> shader,
                                  const std::string name,
-                                 const std::any& value) {
+                                 const std::any& value,
+                                 int *texture_unit_index) {
   int loc;
-  int texteure_unit_index = 0;
   if (value.type() == typeid(float)) {
     auto raw_value = std::any_cast<float>(value);
     loc = shader->GetUniformLocation(name.c_str());
@@ -131,14 +131,14 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
       glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
   } else if (value.type() == typeid(std::shared_ptr<Texture>)) {
     auto raw_value = std::any_cast<std::shared_ptr<Texture>>(value);
-    if (shader->SetUniformValues(name.c_str(), texteure_unit_index) >= 0) {
-      glActiveTexture(GL_TEXTURE0 + texteure_unit_index);
+    if (shader->SetUniformValues(name.c_str(), *texture_unit_index) >= 0) {
+      glActiveTexture(GL_TEXTURE0 + *texture_unit_index);
       if (raw_value->is_cube_map) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, raw_value->texture_id);
       } else {
         glBindTexture(GL_TEXTURE_2D, raw_value->texture_id);
       }
-      texteure_unit_index++;
+      (*texture_unit_index)++;
     }
   } else {
     assert(0);
@@ -149,9 +149,10 @@ void Material::UpdateShaderUniforms(Transform* t) {
   // TODO...
   SetProperty("phong_exponent", 5.0f);
 
+  int texture_unit_index = 0;
   auto it = properties_.begin();
   while (it != properties_.end()) {
-    UpdateShaderProperty(shader, it->first, it->second);
+    UpdateShaderProperty(shader, it->first, it->second, &texture_unit_index);
     it++;
   }
 }

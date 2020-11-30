@@ -70,7 +70,8 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   material->SetProperty("uNormalMatrix", normal_matrix);
 
   material->SetProperty("uSpecular", Vec3(1.0, 1.0, 1.0));
-  material->SetProperty("uShininess", 128.0f);
+  material->SetProperty("uShininess", 8.0f);
+  material->SetProperty("uAmbientLight", Vec3(0.3, 0.3, 0.3));
 
   material->DefineValue("DIRECTION_LIGHT_NUM", 1);
   material->SetProperty("directionalLights[0].direction", mv3x3 * Vec3(0.0, -0.5, -0.5));

@@ -11,6 +11,7 @@ uniform sampler2D uSpecularTexture;
 #endif
 
 uniform vec3 uSpecular;
+uniform vec3 uAmbientLight;
 uniform float uShininess;
 
 in vec2 vUV;
@@ -109,6 +110,14 @@ void RreflectDirectBlinnPhong(
         irradiance * BRDF_Specular_BlinnPhong(directLight, geometry, material.specularColor, material.specularShininess) * material.specularStrength;
 }
 
+void ReflectIndirectBlinnPhong(
+    const in vec3 irradiance,
+    const in GeometricContext geometry,
+    const in BlinnPhongMaterial material,
+    inout ReflectedLight reflectedLight) {
+    reflectedLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert(material.diffuseColor);
+}
+
 #if DIRECTION_LIGHT_NUM > 0
 struct DirectionalLight {
     vec3 direction;
@@ -122,6 +131,13 @@ void getDirectionalDirectLightIrradiance( const in DirectionalLight directionalL
 }
 #endif
 
+vec3 getAmbientLightIrradiance(const in vec3 ambientLightColor) {
+    vec3 irradiance = ambientLightColor;
+    #ifndef PHYSICALLY_CORRECT_LIGHTS
+        irradiance *= PI;
+    #endif
+    return irradiance;
+}
 
 void main()
 {
@@ -132,7 +148,7 @@ void main()
 #endif
 
 #ifdef USE_SPECULAR_TEXTURE
-    float specularStrength = texture2D(uSpecularTexture, vUV);
+    float specularStrength = texture2D(uSpecularTexture, vUV).r;
 #else
     float specularStrength = 1.0;
 #endif
@@ -150,7 +166,7 @@ void main()
     BlinnPhongMaterial material;
     material.diffuseColor = diffuseColor.rgb;
     material.specularColor = uSpecular;
-    material.specularShininess = 256;//uShininess;
+    material.specularShininess = uShininess;
     material.specularStrength = specularStrength;
     GeometricContext geometry;
     geometry.position = vViewPosition;
@@ -168,7 +184,10 @@ void main()
     RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
 #endif
 
-    vec3 outLight = reflectedLight.directDiffuse + reflectedLight.directSpecular;
+    vec3 irradiance = getAmbientLightIrradiance(uAmbientLight);
+    ReflectIndirectBlinnPhong(irradiance, geometry, material, reflectedLight);
+
+    vec3 outLight = reflectedLight.directDiffuse + reflectedLight.directSpecular + reflectedLight.indirectDiffuse;
 
     FragColor = vec4(outLight, diffuseColor.a);
     // FragColor = vec4(reflectedLight.directSpecular, diffuseColor.a);
