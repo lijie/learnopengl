@@ -27,9 +27,7 @@ material_t Material::FindMaterial(const std::string& name) {
 
 static std::map<std::string, texture_t> TextureCollections;
 
-Texture::~Texture() {
-  glDeleteTextures(1, (const GLuint*)&texture_id);
-}
+Texture::~Texture() { glDeleteTextures(1, (const GLuint*)&texture_id); }
 
 void Texture::SetupTexture() {
   // check texture id
@@ -55,8 +53,7 @@ void Texture::SetupTexture() {
   glGenerateMipmap(GL_TEXTURE_2D);
 
   auto wrap = GL_REPEAT;
-  if (format == GL_RGBA)
-    wrap = GL_CLAMP_TO_EDGE;
+  if (format == GL_RGBA) wrap = GL_CLAMP_TO_EDGE;
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
@@ -159,13 +156,34 @@ void Material::UpdateShaderUniforms(Transform* t) {
   }
 }
 
+void Material::DefineValue(const std::string& name) {
+  shader->DefineValue(name);
+}
+
+void Material::DefineValue(const std::string& name, int val) {
+  shader->DefineValue(name, val);
+}
+
 void Material::UseShader(Transform* t) {
   shader->Use();
   UpdateShaderUniforms(t);
 }
 
-void MaterialStart() {
+void Material::SetDiffuseTexture(texture_t tex) {
+  DefineValue(DIFFUSE_MACRO);
+  SetProperty(DIFFUSE_TEXTURE, tex);
 }
+
+void Material::SetNormalTexture(texture_t tex) {
+  DefineValue(NORMAL_MACRO);
+  SetProperty(NORMAL_TEXTURE, tex);
+}
+void Material::SetSpecularTexture(texture_t tex) {
+  DefineValue(SPECULAR_MACRO);
+  SetProperty(SPECULAR_TEXTURE, tex);
+}
+
+void MaterialStart() {}
 
 void MaterialFinish() {
   TextureCollections.clear();

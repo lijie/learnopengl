@@ -10,6 +10,7 @@
 #include "renderer.h"
 #include "camera.h"
 #include "material.h"
+#include "glm/gtx/string_cast.hpp"
 
 class RendererCompare {
  public:
@@ -36,21 +37,40 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   glm::mat4 model = renderer->model();
 
   auto view = GetCamera()->GetViewMatrix();
+  // printf("glm view matrix: %s\n", glm::to_string(view).c_str());
+  // printf("model matrix: %s\n", glm::to_string(model).c_str());
   auto projection = GetCamera()->GetProjectionMatrix();
   auto mvp = projection * view * model;
   auto mv3x3 = glm::mat3(view * model);
+  // printf("mv3x3 matrix: %s\n", glm::to_string(mv3x3).c_str());
   auto normal_model = glm::mat3(glm::transpose(glm::inverse(model)));
+  auto normal_matrix = glm::transpose(glm::inverse(mv3x3));
 
   auto material = renderer->material();
   if (material == nullptr)
     return;
 
+  // deprecated
   material->SetProperty("model", model);
   material->SetProperty("view", view);
   material->SetProperty("projection", projection);
   material->SetProperty("mvp", mvp);
   material->SetProperty("mv3x3", mv3x3);
   material->SetProperty("normal_model", normal_model);
+
+  material->SetProperty("uModel", model);
+  material->SetProperty("uView", view);
+  material->SetProperty("uProjection", projection);
+  material->SetProperty("uMVP", mvp);
+  material->SetProperty("uMV3x3", mv3x3);
+  material->SetProperty("uNormalMatrix", normal_matrix);
+
+  material->SetProperty("uSpecular", Vec3(1.0, 1.0, 1.0));
+  material->SetProperty("uShininess", 128.0f);
+
+  material->DefineValue("DIRECTION_LIGHT_NUM", 1);
+  material->SetProperty("directionalLights[0].direction", mv3x3 * Vec3(0.0, -0.5, -0.5));
+  material->SetProperty("directionalLights[0].color", Vec3(1.0, 1.0, 1.0));
 
   auto light_source = GetLightSource();
   if (light_source != nullptr) {

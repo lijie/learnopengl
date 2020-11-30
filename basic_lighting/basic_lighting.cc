@@ -234,7 +234,7 @@ static void draw_light(GlContext *c) {
 
 static void draw(GlContext *c) {
   draw_light(c);
-  draw_cube(c);  
+  draw_cube(c);
 }
 
 static void init_vertices(GlContext *c) {

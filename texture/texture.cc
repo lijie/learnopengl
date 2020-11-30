@@ -58,10 +58,23 @@ static void draw(GlContext *c)
 	glBindTexture(GL_TEXTURE_2D, c->texture_ids[0]);
         c->shader->Use();
 	glBindVertexArray(c->vao);
-	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+	// glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+static float vertices[] = {
+  -0.9, 0.9, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+  -0.1, 0.9, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
+  -0.9, 0.1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+  -0.1, 0.1, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0,
+
+  -0.9, -0.1, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+  -0.1, -0.1, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0,
+  -0.9, -0.9, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+  -0.1, -0.9, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0,
+};
+
+#if 0
 static float vertices[] = {
   // positions        // normal  // texture Coords
   0.5f, -0.5f, 0.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // A
@@ -72,6 +85,7 @@ static float vertices[] = {
   -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f, // D
   0.5f, -0.5f, 0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f,  // A
 };
+#endif
 
 #if 0
 float vertices[] = {
@@ -111,10 +125,11 @@ static void reset_vertices_with_image(struct image_data *image, float *vertices)
 static void init_vertices(GlContext *c, struct image_data *image)
 {
 	static unsigned int indices[] = {
-//		0, 1, 3,
-//		1, 2, 3,
-		0, 1, 3,
-		0, 2, 3,
+		0, 1, 2,
+		1, 3, 2,
+
+		4, 5, 6,
+		5, 7, 6,
 	};
 
 	// reset_vertices_with_image(image, vertices);

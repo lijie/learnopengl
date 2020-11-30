@@ -15,7 +15,7 @@ Mat4 Camera::GetViewMatrix() {
 }
 
 Mat4 Camera::GetProjectionMatrix() {
-    return glm::perspective(glm::radians(fov()), aspect_ratio_, 0.1, 100.0);
+    return glm::perspective(glm::radians(fov()), aspect_ratio_, 0.1, 1000.0);
 }
 
 void Camera::UpdateVectors() {
@@ -27,6 +27,7 @@ void Camera::UpdateVectors() {
   direction.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
 
   front_ = glm::normalize(direction);
+  printf("camera front: %f, %f, %f\n", front_.x, front_.y, front_.z);
 
   // 右手准则
   right_ = glm::normalize(glm::cross(front_, world_up_));

@@ -19,6 +19,7 @@ class Shader {
   bool CompileAndLink();
   void Use();
   int GetUniformLocation(const char *name);
+  int GetAttribLocation(const char *name);
 
   template<typename T = int>
   int SetUniformValues(const char *name, T v1) {
@@ -48,6 +49,8 @@ class Shader {
   void SetParameter(const std::string& name, T value) {
     
   }
+  void DefineValue(const std::string& name);
+  void DefineValue(const std::string& name, int val);
 
   static std::shared_ptr<Shader> NewShader(const std::string& shader_name);
 
@@ -61,6 +64,7 @@ class Shader {
   uint32_t vertex_shader_ = 0;
   uint32_t fragment_shader_ = 0;
   uint32_t program_ = 0;
+  std::string defined_values_ = "#version 330 core\n";
 
   int CheckCompileSuccess(uint32_t shader);
   int CheckLinkSuccess(uint32_t program);

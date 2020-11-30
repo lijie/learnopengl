@@ -14,7 +14,8 @@ class GlContext;
 class Model : public Renderer {
  public:
   Model() {}
-  bool Load(const std::string &path, bool gamma = false);
+  bool Load(const std::string &path, const std::string& texture_location,
+      bool gamma = false, bool flip_uv = true);
   // std::vector<Mesh *> meshes;
 
   void Render() override;
@@ -22,6 +23,7 @@ class Model : public Renderer {
 
  private:
   std::string directory_;
+  bool enable_texture_location_ = false;
 
   void ProcessNode(aiNode *node, const aiScene *scene);
   std::shared_ptr<Mesh> ProcessMesh(aiMesh *mesh, const aiScene *scene);

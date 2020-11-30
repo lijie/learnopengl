@@ -84,6 +84,14 @@ class Material {
     properties_[name] = value;
   }
 
+  void DefineValue(const std::string& name);
+  void DefineValue(const std::string& name, int value);
+
+  // common uniforms setters
+  void SetDiffuseTexture(texture_t tex);
+  void SetNormalTexture(texture_t tex);
+  void SetSpecularTexture(texture_t tex);
+
  private:
   void UpdateShaderUniforms(Transform* t);
   std::map<std::string, std::any> properties_;
@@ -96,17 +104,14 @@ class Material {
 
 typedef std::shared_ptr<Material> material_t;
 
-// Material::Material() {
-// for(int i = 0; i < MATERIAL_TEXTURE_NUM; i++) {
-//   textures[i] = nullptr;
-// }
-// for(int i = 0; i < MATERIAL_COLOR_NUM; i++) {
-//   colors[i] = INVALID_COLOR;
-// }
-// }
+// common uniform name
+#define DIFFUSE_TEXTURE "uDiffuseTexture"
+#define DIFFUSE_MACRO "USE_DIFFUSE_TEXTURE"
 
-// void Material::UpdateShaderUniforms() {
+#define NORMAL_TEXTURE "uNormalTexture"
+#define NORMAL_MACRO "USE_NORMAL_TEXTURE"
 
-// }
+#define SPECULAR_TEXTURE "uSpecularTexture"
+#define SPECULAR_MACRO "USE_SPECULAR_TEXTURE"
 
 #endif  // __LEARNOPENGL_COMMON_MATERIAL_H__

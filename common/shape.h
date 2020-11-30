@@ -20,6 +20,8 @@ struct VAOAttr {
 
   int external_vbo;
   int divisor;
+  int attr_location;
+  std::string attr_name;
 
   VAOAttr() {}
 
@@ -36,6 +38,7 @@ struct VAOAttr {
 
     external_vbo = -1;
     divisor = 0;
+    attr_location = -1;
   }
 };
 

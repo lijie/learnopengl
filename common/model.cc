@@ -1,18 +1,30 @@
 #include "model.h"
 
-bool Model::Load(const std::string &path, bool gamma) {
+bool Model::Load(const std::string &path, const std::string& texture_location,
+    bool gamma, bool flip_uv) {
   // read file via ASSIMP
   Assimp::Importer importer;
+
+  unsigned int flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace;
+  if (flip_uv)
+      flags |= aiProcess_FlipUVs;
   const aiScene *scene =
-      importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+      importer.ReadFile(path, flags);
   // check for errors
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {
     fprintf(stderr, "ERROR::ASSIMP:: %s \n", importer.GetErrorString());
     return false;
   }
-  // retrieve the directory path of the filepath
-  directory_ = path.substr(0, path.find_last_of('/'));
+
+  if (texture_location == "") {
+      // retrieve the directory path of the filepath
+      directory_ = path.substr(0, path.find_last_of('/'));
+  }
+  else {
+      directory_ = texture_location;
+      enable_texture_location_ = true;
+  }
 
   // process ASSIMP's root node recursively
   ProcessNode(scene->mRootNode, scene);
@@ -84,15 +96,19 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
     } else
       vertex.TexCoord = glm::vec2(0.0f, 0.0f);
     // tangent
-    vector.x = mesh->mTangents[i].x;
-    vector.y = mesh->mTangents[i].y;
-    vector.z = mesh->mTangents[i].z;
-    vertex.Tangent = vector;
+    if (mesh->mTangents) {
+        vector.x = mesh->mTangents[i].x;
+        vector.y = mesh->mTangents[i].y;
+        vector.z = mesh->mTangents[i].z;
+        vertex.Tangent = vector;
+    }
     // bitangent
-    vector.x = mesh->mBitangents[i].x;
-    vector.y = mesh->mBitangents[i].y;
-    vector.z = mesh->mBitangents[i].z;
-    vertex.Bitangent = vector;
+    if (mesh->mBitangents) {
+        vector.x = mesh->mBitangents[i].x;
+        vector.y = mesh->mBitangents[i].y;
+        vector.z = mesh->mBitangents[i].z;
+        vertex.Bitangent = vector;
+    }
     _mesh->vertices.push_back(vertex);
   }
   // now wak through each of the mesh's faces (a face is a mesh its triangle)
@@ -147,17 +163,31 @@ texture_t Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                       TextureType type_alias) {
   auto count = mat->GetTextureCount(type);
   if (count > 1) {
-    assert(0);
-    return nullptr;
+    fprintf(stderr, "ONLY SUPPORT ONE TEXTURE PER TYPE!\n");
   }
   if (count == 0) return nullptr;
   aiString str;
   mat->GetTexture(type, 0, &str);
 
+  std::string file_name;
+  if (enable_texture_location_) {
+      std::string tex_path = std::string(str.C_Str());
+      size_t pos = tex_path.find_last_of('/');
+      if (pos == std::string::npos) {
+          pos = tex_path.find_last_of('\\');
+      }
+      if (pos != std::string::npos) {
+          file_name = tex_path.substr(pos + 1, std::string::npos);
+      }
+  }
+  if (file_name.length() == 0) {
+      file_name = std::string(str.C_Str());
+  }
+
 #ifdef __WIN32__
-  std::string full_path = this->directory_ + "\\" + std::string(str.C_Str());
+  std::string full_path = this->directory_ + "\\" + file_name;
 #else
-  std::string full_path = this->directory_ + "/" + std::string(str.C_Str());
+  std::string full_path = this->directory_ + "/" + file_name;
 #endif
 
   fprintf(stdout, "Load Texutre: %s\n", full_path.c_str());

@@ -41,7 +41,10 @@ void main()
     vec3 r = reflect(-l, n);
     float cos_alpha = clamp(dot(e, r), 0, 1);
 
-    FragColor = vec4(ambient_color +
-        diffuse_color * light_color * light_power * cos_theta / (light_distance * light_distance) +
-        specular_color * light_color * light_power * pow(cos_alpha, phong_exponent) / (light_distance * light_distance), 1.0);
+    // FragColor = vec4(ambient_color +
+    //     diffuse_color * light_color * light_power * cos_theta / (light_distance * light_distance) +
+    //     specular_color * light_color * light_power * pow(cos_alpha, phong_exponent) /
+    //     (light_distance * light_distance), 1.0);
+
+    FragColor = vec4(diffuse_color, 1.0);
 }

@@ -74,12 +74,12 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 }
 
 void test_move(double dt) {
-  auto transform = GetWorld()->GetLightSource();
-  auto p = transform->position();
+  // auto transform = GetWorld()->GetLightSource();
+  // auto p = transform->position();
 
-  light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
-  light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
-  light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
+  // light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
 
   // transform->set_model(light_source_model);
 }
@@ -113,14 +113,27 @@ glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
 static void init_model(GlContext *c) {
   auto model = std::make_shared<Model>();
-    // std::string path = "../models/nanosuit/nanosuit.obj";
-    // std::string path = "../models/the-lighthouse/scene.gltf";
-    // std::string path = "../models/station_b/scene.gltf";
-  std::string path = "../models/low-poly-medieval-island/source/island_done.fbx";
-    model->Load(path, "../models/low-poly-medieval-island/textures", false, false);
+    std::string path = "../models/nanosuit/nanosuit.obj";
+    // std::string path = "../models/backpack/backpack.obj";
+    model->Load(path, false);
     GetWorld()->AddRenderer(model);
     // GetWorld()->SetTarget(model);
 }
+
+static void init_cube1(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = make_shared<Material>("../shaders/phong");
+
+  // init material
+  mat->SetProperty("albedo", Vec3(0.6, 0.2, 0.2));
+  auto tex = Texture::NewTexture("../texture/tmtjfd0r_2K_Albedo.jpg", kMainTex);
+  mat->SetDiffuseTexture(tex);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(0.0f, 0.0f, 0.0f));
+  GetWorld()->AddRenderer(cube);
+}
+
 
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
@@ -128,15 +141,15 @@ static void init_scene(GlContext *c) {
   Camera *camera = new Camera(Vec3(0.0, 0.0, 3.0), Vec3(0, 1, 0), 45.0, (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  auto light_source = std::make_shared<LightSource>();
-  GetWorld()->AddLightSource(light_source);
+  // auto light_source = std::make_shared<LightSource>();
+  // GetWorld()->AddLightSource(light_source);
 
   // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
   // light_source->set_model(light_source_model);
-  light_source->Translate(Vec3(10, 10, 10));
-  light_source->set_power(600);
+  // light_source->Translate(Vec3(0, 5, 0));
+  // light_source->set_power(500);
 
-  init_model(c);
+  init_cube1(c);
 }
 
 static void draw(GlContext *c) {
@@ -178,14 +191,17 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
+  // glEnable(GL_BLEND);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   while (!glfwWindowShouldClose(window)) {
     last_frame_time = current_frame_time;
     current_frame_time = glfwGetTime();
 
     process_input(window);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     draw(context);
 

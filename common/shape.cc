@@ -48,6 +48,7 @@ void Shape::Submit() {
   auto size = vertex_size_ * 8 * sizeof(float);
   glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
 
+#if 0
   for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
     const VAOAttr& attr = vao_attr_vec_[i];
 
@@ -60,7 +61,25 @@ void Shape::Submit() {
       glVertexAttribDivisor(i, attr.divisor);
     }
   }
+#endif
+  for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
+    const VAOAttr& attr = vao_attr_vec_[i];
 
+    if (attr.external_vbo >= 0) {
+      glBindBuffer(GL_ARRAY_BUFFER, attr.external_vbo);
+    }
+
+    if (attr.attr_name.length() == 0) {
+      assert(0);
+    }
+
+    auto loc = material_->shader->GetAttribLocation(attr.attr_name.c_str());
+    // printf("attr localtion: %s, %d\n", attr.attr_name.c_str(), loc);
+    if (loc < 0)
+      continue;
+    glEnableVertexAttribArray(loc);
+    glVertexAttribPointer(loc, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
+  }
   glBindVertexArray(0);
 
   if (before_render_func_ != nullptr)
@@ -125,12 +144,15 @@ Cube::Cube() : Shape() {
   VAOAttr attr;
   // pos attr
   attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+  attr.attr_name = "aVertices";
   vao_attr_vec_.push_back(attr);
   // normal attr
   attr.Reset(3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 3 * sizeof(float));
+  attr.attr_name = "aNormal";
   vao_attr_vec_.push_back(attr);
   // texcoord attr
   attr.Reset(2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 6 * sizeof(float));
+  attr.attr_name = "aUV";
   vao_attr_vec_.push_back(attr);
 }
 

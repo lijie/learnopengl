@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include <map>
+#include <sstream>
 #include <string>
 
 #include "camera.h"
@@ -39,11 +40,13 @@ std::shared_ptr<Shader> Shader::NewShader(const std::string &shader_name) {
 
   auto shader = std::make_shared<Shader>();
   shader->Open(v_path.c_str(), f_path.c_str());
+#if 0
   bool res = shader->CompileAndLink();
   if (!res) {
     return nullptr;
   }
   ShaderCollections[shader_name] = shader;
+#endif
   return shader;
 }
 
@@ -117,14 +120,27 @@ bool Shader::CompileAndLink() {
   uint32_t vertex_shader;
   uint32_t fragment_shader;
   uint32_t shader_program;
+
   bool res = false;
 
   if (flags_ & SHADER_FLAGS_ALREADY_COMPILE) {
     return true;
   }
 
+  std::string v_src;
+  std::string f_src;
+
+  v_src = defined_values_ + std::string(vertex_source_);
+  f_src = defined_values_ + std::string(fragment_source_);
+
+  const char *v_src_ptr = v_src.c_str();
+  const char *f_src_ptr = f_src.c_str();
+
+  printf("%s\n", v_src_ptr);
+  printf("%s\n", f_src_ptr);
+
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &vertex_source_, NULL);
+  glShaderSource(vertex_shader, 1, &v_src_ptr, NULL);
   glCompileShader(vertex_shader);
 
   if (!CheckCompileSuccess(vertex_shader)) {
@@ -133,7 +149,7 @@ bool Shader::CompileAndLink() {
   }
 
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &fragment_source_, NULL);
+  glShaderSource(fragment_shader, 1, &f_src_ptr, NULL);
   glCompileShader(fragment_shader);
 
   if (!CheckCompileSuccess(fragment_shader)) {
@@ -163,8 +179,27 @@ out:
   return res;
 }
 
-void Shader::Use() { glUseProgram(program_); }
+void Shader::Use() {
+  bool res = CompileAndLink();
+  assert(res != false);
+  glUseProgram(program_);
+}
 
 int Shader::GetUniformLocation(const char *name) {
   return glGetUniformLocation(program_, name);
+}
+
+int Shader::GetAttribLocation(const char *name) {
+  return glGetAttribLocation(program_, name);
+}
+
+void Shader::DefineValue(const std::string &name) {
+  defined_values_ = defined_values_ + "#define " + name + "\n";
+}
+
+void Shader::DefineValue(const std::string &name, int val) {
+  std::stringstream ss;
+  ss << val;
+  std::string s = "#define " + name + " " + ss.str() + "\n";
+  defined_values_ = defined_values_ + s;
 }
