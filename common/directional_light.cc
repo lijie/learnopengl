@@ -1,19 +1,37 @@
 #include "directional_light.h"
+
+#include "glm/gtx/string_cast.hpp"
 #include "material.h"
+#include "scene.h"
 
-void DirectionalLight::set_rotation(float angle, Vec3 axis) {
-    Mat4 model = Mat3(1.0);
-    model = glm::rotate(model, glm::radians(angle), axis);
-    Vec4 new_direction = model * Vec4(direction_, 1.0);
-    set_direction(Vec3(new_direction));
+void DirectionalLight::SetUniforms(std::shared_ptr<Material> mat,
+                                   const SceneCommonUniforms& common_uniforms) {
+  char buf[64];
+
+  Vec4 dir = common_uniforms.ViewMatrix * Vec4(direction(), 1.0);
+  // printf("dir: %s\n", glm::to_string(dir));
+
+  snprintf(buf, sizeof(buf), "directionalLights[%d].direction", index());
+  mat->SetProperty(std::string(buf), Vec3(dir));
+  snprintf(buf, sizeof(buf), "directionalLights[%d].color", index());
+  mat->SetProperty(std::string(buf), color_);
 }
 
-void DirectionalLight::SetUniforms(std::shared_ptr<Material> mat) {
-    mat->DefineValue("DIRECTION_LIGHT_NUM", 1);
-    mat->SetProperty("directionalLights[0].direction", direction_);
-    mat->SetProperty("directionalLights[0].color", color_);
+void LightManager::AddLight(LightPtr light) {
+  if (light->light_type() == kDirectionalLight) {
+    light->set_index(directional_light_index_);
+    directional_light_index_++;
+  }
+
+  light_vec_.push_back(light);
 }
 
-void LightManager::AddLight(std::shared_ptr<Light> light) {
+void LightManager::SetUniforms(MaterialPtr mat,
+                               const SceneCommonUniforms& common_uniforms) {
+  mat->DefineValue("DIRECTION_LIGHT_NUM", directional_light_index_);
 
+  for (auto i = 0; i < light_vec_.size(); i++) {
+    auto& light = light_vec_[i];
+    light->SetUniforms(mat, common_uniforms);
+  }
 }

@@ -14,8 +14,15 @@ class Framebuffer;
 class LightManager;
 class Light;
 
+struct SceneCommonUniforms {
+  Mat4 ViewMatrix;
+  Mat4 ProjectionMatrix;
+};
+
 class Scene {
  public:
+  Scene();
+  ~Scene();
   void AddCamera(Camera *c) { camera_ = c; }
   Camera *GetCamera() { return camera_; }
 
@@ -50,6 +57,7 @@ class Scene {
   std::shared_ptr<Transform> target_ = nullptr;
 
   void SortRenderer();
-  void UpdateMaterialProperties(std::shared_ptr<Renderer> renderer);
+  void UpdateMaterialProperties(RendererPtr renderer, const SceneCommonUniforms &common_uniforms);
 };
+
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

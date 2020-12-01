@@ -26,4 +26,19 @@ void GlobalFinish();
 void MaterialStart();
 void MaterialFinish();
 
+template<typename T, typename ...Ts>
+std::shared_ptr<T> NewSharedObject(Ts ...args) {
+  return std::make_shared<T>(args...);
+}
+
+class Material;
+class Shader;
+class Renderer;
+class Light;
+
+typedef std::shared_ptr<Material> MaterialPtr;
+typedef std::shared_ptr<Shader> ShaderPtr;
+typedef std::shared_ptr<Renderer> RendererPtr;
+typedef std::shared_ptr<Light> LightPtr;
+
 #endif  // __LEARNOPENGL_LO_COMMON_H__

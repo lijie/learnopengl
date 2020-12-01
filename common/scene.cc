@@ -21,6 +21,14 @@ class RendererCompare {
   }
 };
 
+Scene::Scene() {
+  light_manager_ = new LightManager;
+}
+
+Scene::~Scene() {
+  delete light_manager_;
+}
+
 void Scene::SortRenderer() {
   RendererCompare cmp;
   renderer_list_.sort([cmp](const std::shared_ptr<Renderer>& r1,
@@ -29,19 +37,19 @@ void Scene::SortRenderer() {
   });
 }
 
-void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
+void Scene::UpdateMaterialProperties(RendererPtr renderer, const SceneCommonUniforms& common_uniforms) {
   auto children = renderer->GetChildren();
   for (size_t i = 0; i < children.size(); i++) {
     auto child = children[i];
-    UpdateMaterialProperties(child);
+    UpdateMaterialProperties(child, common_uniforms);
   }
 
   glm::mat4 model = renderer->model();
 
-  auto view = GetCamera()->GetViewMatrix();
+  auto& view = common_uniforms.ViewMatrix;
   // printf("glm view matrix: %s\n", glm::to_string(view).c_str());
   // printf("model matrix: %s\n", glm::to_string(model).c_str());
-  auto projection = GetCamera()->GetProjectionMatrix();
+  auto& projection = common_uniforms.ProjectionMatrix;
   auto mvp = projection * view * model;
   auto model_view = view * model;
   auto mv3x3 = glm::mat3(model_view);
@@ -73,9 +81,15 @@ void Scene::UpdateMaterialProperties(std::shared_ptr<Renderer> renderer) {
   material->SetProperty("uShininess", 8.0f);
   material->SetProperty("uAmbientLight", Vec3(0.3, 0.3, 0.3));
 
-  material->DefineValue("DIRECTION_LIGHT_NUM", 1);
-  material->SetProperty("directionalLights[0].direction", mv3x3 * Vec3(0.0, -0.5, -0.5));
-  material->SetProperty("directionalLights[0].color", Vec3(1.0, 1.0, 1.0));
+  // printf("view %s\n", glm::to_string(view).c_str());
+  // printf("view %s\n", glm::to_string(glm::mat3(view)).c_str());
+
+  // set light uniforms
+  light_manager_->SetUniforms(material, common_uniforms);
+
+  // material->DefineValue("DIRECTION_LIGHT_NUM", 1);
+  // material->SetProperty("directionalLights[0].direction", mv3x3 * Vec3(0.0, -0.5, -0.5));
+  // material->SetProperty("directionalLights[0].color", Vec3(1.0, 1.0, 1.0));
 
 #if 0
   auto light_source = GetLightSource();
@@ -102,10 +116,16 @@ void Scene::Render(GlContext* ctx, std::shared_ptr<Framebuffer> target_buffer) {
     target_buffer->Enable();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   }
+
+  SceneCommonUniforms common_unifroms;
+
+  common_unifroms.ViewMatrix = GetCamera()->GetViewMatrix();
+  common_unifroms.ProjectionMatrix = GetCamera()->GetProjectionMatrix();
+
   auto it = renderer_list_.begin();
   while (it != renderer_list_.end()) {
     // fprintf(stdout, "render object.\n");
-    UpdateMaterialProperties(*it);
+    UpdateMaterialProperties(*it, common_unifroms);
     (*it)->Update(0);
     it++;
   }
@@ -126,6 +146,6 @@ void Scene::AddRenderer(shared_ptr<Renderer> renderer, int pri) {
   renderer_list_.push_back(renderer);
 }
 
-void Scene::AddLight(std::shared_ptr<Light> light) {
+void Scene::AddLight(LightPtr light) {
   light_manager_->AddLight(light);
 }
