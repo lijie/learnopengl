@@ -145,8 +145,15 @@ static void init_scene(GlContext *c) {
   Camera *camera = new Camera(Vec3(0.0, 0.0, 3.0), Vec3(0, 1, 0), 45.0, (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  auto directional_light = NewSharedObject<DirectionalLight>(Vec3(0.0, -0.5, -0.5), Vec3(1.0, 1.0, 1.0));
+  auto directional_light = NewSharedObject<DirectionalLight>(Vec3(0.0, -0.5, -0.5), COLOR_WHITE);
   GetWorld()->AddLight(directional_light);
+
+  auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.3, 0.3, 0.3));
+  GetWorld()->AddLight(ambient_light);
+
+  auto point_light = NewSharedObject<PointLight>(0, 0, COLOR_WHITE);
+  point_light->GetTransform()->set_position(Vec3(2.0f, 0.0f, 0.0f));
+  GetWorld()->AddLight(point_light);
 
   // auto light_source = std::make_shared<LightSource>();
   // GetWorld()->AddLightSource(light_source);

@@ -52,6 +52,21 @@ struct BlinnPhongMaterial {
     #define saturate(a) clamp( a, 0.0, 1.0 )
 #endif
 
+float punctualLightIntensityToIrradianceFactor(const in float lightDistance, const in float cutoffDistance, const in float decayExponent) {
+#if defined ( PHYSICALLY_CORRECT_LIGHTS )
+    float distanceFalloff = 1.0 / max( pow( lightDistance, decayExponent ), 0.01 );
+    if( cutoffDistance > 0.0 ) {
+        distanceFalloff *= pow2( saturate( 1.0 - pow4( lightDistance / cutoffDistance ) ) );
+    }
+    return distanceFalloff;
+#else
+    if( cutoffDistance > 0.0 && decayExponent > 0.0 ) {
+        return pow( saturate( -lightDistance / cutoffDistance + 1.0 ), decayExponent );
+    }
+    return 1.0;
+#endif
+}
+
 vec3 BRDF_Diffuse_Lambert(const in vec3 diffuseColor) {
     return RECIPROCAL_PI * diffuseColor;
 }
@@ -131,6 +146,24 @@ void getDirectionalDirectLightIrradiance( const in DirectionalLight directionalL
 }
 #endif
 
+#if POINT_LIGHT_NUM > 0
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    float distance;
+    float decay;
+};
+uniform PointLight pointLights[POINT_LIGHT_NUM];
+void getPointDirectLightIrradiance( const in PointLight pointLight, const in GeometricContext geometry, out IncidentLight directLight ) {
+    vec3 lVector = pointLight.position - geometry.position;
+    directLight.direction = normalize( lVector );
+    float lightDistance = length( lVector );
+    directLight.color = pointLight.color;
+    directLight.color *= punctualLightIntensityToIrradianceFactor( lightDistance, pointLight.distance, pointLight.decay );
+    directLight.visible = (directLight.color != vec3(0.0));
+}
+#endif
+
 vec3 getAmbientLightIrradiance(const in vec3 ambientLightColor) {
     vec3 irradiance = ambientLightColor;
     #ifndef PHYSICALLY_CORRECT_LIGHTS
@@ -181,6 +214,13 @@ void main()
 
     directionalLight = directionalLights[ 0 ];
     getDirectionalDirectLightIrradiance(directionalLight, geometry, directLight);
+    RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
+#endif
+
+#if POINT_LIGHT_NUM > 0
+    PointLight pointLight;
+    pointLight = pointLights[0];
+    getPointDirectLightIrradiance(pointLight, geometry, directLight);
     RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
 #endif
 

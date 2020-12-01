@@ -41,4 +41,7 @@ typedef std::shared_ptr<Shader> ShaderPtr;
 typedef std::shared_ptr<Renderer> RendererPtr;
 typedef std::shared_ptr<Light> LightPtr;
 
+#define COLOR_WHITE Vec3(1.0f, 1.0f, 1.0f)
+#define COLOR_BLACK Vec3(0.0f, 0.0f, 0.0f)
+
 #endif  // __LEARNOPENGL_LO_COMMON_H__
