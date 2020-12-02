@@ -3,9 +3,9 @@
 
 #include <any>
 #include <map>
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "lo_common.h"
@@ -60,6 +60,14 @@ class Texture {
 
 typedef std::shared_ptr<Texture> texture_t;
 
+struct MaterialParams {
+  float Shininess;
+  Vec3 Albedo;
+  Vec3 Specular;
+  std::string DiffuseTexture;
+  std::string SpecularTexture;
+};
+
 #define MATERIAL_TEXTURE_NUM 16
 #define MATERIAL_COLOR_NUM 16
 class Material {
@@ -92,6 +100,8 @@ class Material {
   void SetNormalTexture(texture_t tex);
   void SetSpecularTexture(texture_t tex);
 
+  void SetParams(const MaterialParams& params);
+
  private:
   void UpdateShaderUniforms(Transform* t);
   std::map<std::string, std::any> properties_;
@@ -103,6 +113,11 @@ class Material {
 };
 
 typedef std::shared_ptr<Material> material_t;
+
+class PhongMaterial : public Material {
+ public:
+  PhongMaterial() : Material("../shaders/phong") {}
+};
 
 // common uniform name
 #define DIFFUSE_TEXTURE "uDiffuseTexture"

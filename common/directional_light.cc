@@ -8,8 +8,10 @@ void DirectionalLight::SetUniforms(std::shared_ptr<Material> mat,
                                    const SceneCommonUniforms& common_uniforms) {
   char buf[64];
 
-  Vec4 dir = common_uniforms.ViewMatrix * Vec4(direction(), 1.0);
-  // printf("dir: %s\n", glm::to_string(dir));
+  Vec4 dir = glm::normalize(common_uniforms.ViewMatrix * Vec4(direction(), 1.0));
+  // printf("dl position: %s\n", glm::to_string(transform_.position()).c_str());
+  // printf("dl target: %s\n", glm::to_string(target_).c_str());
+  // printf("dl in view space: %s\n", glm::to_string(dir).c_str());
 
   snprintf(buf, sizeof(buf), "directionalLights[%d].direction", index());
   mat->SetProperty(std::string(buf), Vec3(dir));

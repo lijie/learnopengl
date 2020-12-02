@@ -10,6 +10,7 @@ uniform sampler2D uDiffuseTexture;
 uniform sampler2D uSpecularTexture;
 #endif
 
+uniform vec3 uAlbedo;
 uniform vec3 uSpecular;
 uniform vec3 uAmbientLight;
 uniform float uShininess;
@@ -177,7 +178,7 @@ void main()
 #ifdef USE_DIFFUSE_TEXTURE
     vec4 diffuseColor = texture(uDiffuseTexture, vUV);
 #else
-    vec4 diffuseColor = vec4(0.5, 0.5, 0.5, 1.0);
+    vec4 diffuseColor = vec4(uAlbedo, 1.0);
 #endif
 
 #ifdef USE_SPECULAR_TEXTURE

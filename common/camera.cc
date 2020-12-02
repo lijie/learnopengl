@@ -36,8 +36,8 @@ void Camera::UpdateVectors() {
 #endif
 
   front_ = glm::normalize(direction);
-  printf("camera front: %s\n", glm::to_string(front_).c_str());
-  printf("position: %s\n", glm::to_string(position_).c_str());
+  // printf("camera front: %s\n", glm::to_string(front_).c_str());
+  // printf("position: %s\n", glm::to_string(position_).c_str());
 
   // 右手准则
   right_ = glm::normalize(glm::cross(front_, world_up_));
@@ -46,6 +46,7 @@ void Camera::UpdateVectors() {
 
 void Camera::ProcessKey(CameraKey key, double delta_time) {
   double velocity = move_speed_ * delta_time;
+
   switch (key) {
     case kCameraKeyForward:
       position_ += front_ * (float)velocity;
@@ -83,13 +84,12 @@ void Camera::ProcessMouse(double delta_x, double delta_y) {
     yaw_ = -89.0;
   }
 
-  {
+  if (abs(offset_x) > abs(offset_y)) {
     Vec3 direction = position_ - look_target_;
     direction =
         glm::rotate(direction, float(glm::radians(yaw_)), Vec3(0, 1, 0));
     position_ = direction;
-  }
-  {
+  } else  {
     Vec3 direction = position_ - look_target_;
     direction =
         glm::rotate(direction, float(glm::radians(pitch_)), Vec3(1, 0, 0));

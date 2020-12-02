@@ -127,6 +127,7 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
   // as the following list summarizes: diffuse: texture_diffuseN specular:
   // texture_specularN normal: texture_normalN
 
+#if 0
   material_t _material = std::make_shared<Material>();
 
   auto diffuse_texture =
@@ -148,7 +149,14 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
   // set default shader
   _material->shader = Shader::NewShader("../basic_model/model_shader");
   assert(_material->shader != nullptr);
+#endif
 
+  auto _material = NewSharedObject<PhongMaterial>();
+  MaterialParams params;
+  params.Albedo = Vec3(1.0, 0.2, 0.2);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  _material->SetParams(params);
   // return a mesh object created from the extracted mesh data
   // return new Mesh(vertices, indices, textures);
   _mesh->set_material(_material);

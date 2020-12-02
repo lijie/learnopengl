@@ -1,3 +1,5 @@
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
@@ -7,16 +9,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "context.h"
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-#include "shader.h"
-#include "material.h"
 #include "camera.h"
-#include "shape.h"
+#include "context.h"
+#include "directional_light.h"
+#include "glm/gtx/rotate_vector.hpp"
+#include "material.h"
 #include "model.h"
 #include "scene.h"
-#include "directional_light.h"
+#include "shader.h"
+#include "shape.h"
 
 // #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -44,8 +45,7 @@ static void framebuffer_size_callback(GLFWwindow *window, int width,
 }
 
 static void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-  if (!enable_mouse_move)
-    return;
+  if (!enable_mouse_move) return;
 
   if (first_mouse) {
     first_mouse = false;
@@ -63,24 +63,26 @@ static void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
   GetWorld()->GetCamera()->ProcessMouse(delta_x, delta_y);
 }
 
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-      enable_mouse_move = true;
-    }
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-      enable_mouse_move = false;
-      first_mouse = true;
-    }
+static void mouse_button_callback(GLFWwindow *window, int button, int action,
+                                  int mods) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    enable_mouse_move = true;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    enable_mouse_move = false;
+    first_mouse = true;
+  }
 }
 
 void test_move(double dt) {
   // auto transform = GetWorld()->GetLightSource();
   // auto p = transform->position();
 
-  // light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0, 0));
-  // light_source_model = glm::rotate(light_source_model, glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
-  // light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0, 0));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(-p.x, 0,
+  // 0)); light_source_model = glm::rotate(light_source_model,
+  // glm::radians(20.0f * (float)dt), glm::vec3(0.0f, 1.0f, 0.0f));
+  // light_source_model = glm::translate(light_source_model, glm::vec3(p.x, 0,
+  // 0));
 
   // transform->set_model(light_source_model);
 }
@@ -112,48 +114,60 @@ glm::vec3 light_position(1.2f, -1.0f, 2.0f);
 
 glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
-static void init_model(GlContext *c) {
-  auto model = std::make_shared<Model>();
-    std::string path = "../models/nanosuit/nanosuit.obj";
-    // std::string path = "../models/backpack/backpack.obj";
-    model->Load(path, false);
-    GetWorld()->AddRenderer(model);
-    // GetWorld()->SetTarget(model);
-}
-
 static void init_cube1(GlContext *c) {
   auto cube = make_shared<Cube>();
-  auto mat = make_shared<Material>("../shaders/phong");
+  auto mat = NewSharedObject<PhongMaterial>();
 
-  // init material
-  mat->SetProperty("albedo", Vec3(0.6, 0.2, 0.2));
-  auto tex = Texture::NewTexture("../texture/tmtjfd0r_2K_Albedo.jpg", kMainTex);
-  mat->SetDiffuseTexture(tex);
-
-  auto tex2 = Texture::NewTexture("../texture/tmtjfd0r_2K_Specular.jpg", kMainTex);
-  mat->SetSpecularTexture(tex2);
+  MaterialParams params;
+  params.Albedo = Vec3(0.6, 0.2, 0.2);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  mat->SetParams(params);
 
   cube->set_material(mat);
-  cube->Translate(Vec3(0.0f, 0.0f, 0.0f));
+  cube->Translate(Vec3(0.0f, -3.5f, 0.0f));
+  cube->Scale(Vec3(20.0f, 0.5, 20.0));
   GetWorld()->AddRenderer(cube);
 }
 
+static void init_model(GlContext *c) {
+  auto model = NewSharedObject<Model>();
+  // std::string path = "../models/nanosuit/nanosuit.obj";
+  // std::string path = "../models/the-lighthouse/scene.gltf";
+  // std::string path = "../models/station_b/scene.gltf";
+  std::string path = "../models/sphere.obj";
+  model->Load(path, "", false, false);
+  GetWorld()->AddRenderer(model);
+}
+
+static PointLightPtr rotated_point_light;
+static void rotate_point_light() {
+  auto tramsform = rotated_point_light->GetTransform();
+  auto direction = glm::rotate(tramsform->position(), float(glm::radians(2.0)),
+                               Vec3(0, 1, 0));
+  tramsform->set_position(direction);
+}
 
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
-  Camera *camera = new Camera(Vec3(0.0, 0.0, 3.0), Vec3(0, 1, 0), 45.0, (double)screen_width / screen_height);
+  Camera *camera = new Camera(Vec3(0.0, 0.0, 10.0), Vec3(0, 1, 0), 45.0,
+                              (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  auto directional_light = NewSharedObject<DirectionalLight>(Vec3(0.0, -0.5, -0.5), COLOR_WHITE);
+  auto directional_light =
+      NewSharedObject<DirectionalLight>(Vec3(10.0f, 0.0f, 0.0f), COLOR_WHITE);
   GetWorld()->AddLight(directional_light);
 
   auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.3, 0.3, 0.3));
   GetWorld()->AddLight(ambient_light);
 
   auto point_light = NewSharedObject<PointLight>(0, 0, COLOR_WHITE);
-  point_light->GetTransform()->set_position(Vec3(2.0f, 0.0f, 0.0f));
+  point_light->GetTransform()->set_position(Vec3(4.0f, 0.0f, 0.0f));
   GetWorld()->AddLight(point_light);
+  rotated_point_light = point_light;
 
   // auto light_source = std::make_shared<LightSource>();
   // GetWorld()->AddLightSource(light_source);
@@ -164,10 +178,12 @@ static void init_scene(GlContext *c) {
   // light_source->set_power(500);
 
   init_cube1(c);
+  init_model(c);
 }
 
 static void draw(GlContext *c) {
   GetWorld()->Render(c);
+  rotate_point_light();
 }
 
 static void release_resource(GlContext *c) {
@@ -183,7 +199,8 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(screen_width, screen_height, "OpenGL Demo", NULL, NULL);
+  GLFWwindow *window =
+      glfwCreateWindow(screen_width, screen_height, "OpenGL Demo", NULL, NULL);
   assert(window != NULL);
   glfwMakeContextCurrent(window);
 

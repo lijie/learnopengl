@@ -73,6 +73,8 @@ class PointLight : public Light {
   float decay_;
 };
 
+typedef std::shared_ptr<PointLight> PointLightPtr;
+
 class AmbientLight : public Light {
  public:
   AmbientLight() : Light(kAmbientLight) {}

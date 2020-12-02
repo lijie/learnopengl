@@ -107,9 +107,8 @@ Material::Material(const std::string& shader_path) {
 }
 
 static void UpdateShaderProperty(shared_ptr<Shader> shader,
-                                 const std::string name,
-                                 const std::any& value,
-                                 int *texture_unit_index) {
+                                 const std::string name, const std::any& value,
+                                 int* texture_unit_index) {
   int loc;
   if (value.type() == typeid(float)) {
     auto raw_value = std::any_cast<float>(value);
@@ -117,6 +116,10 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
     if (loc >= 0) glUniform1f(loc, raw_value);
   } else if (value.type() == typeid(glm::vec3)) {
     auto raw_value = std::any_cast<glm::vec3>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
+  } else if (value.type() == typeid(glm::vec4)) {
+    auto raw_value = std::any_cast<glm::vec4>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
   } else if (value.type() == typeid(glm::mat4)) {
@@ -182,6 +185,21 @@ void Material::SetNormalTexture(texture_t tex) {
 void Material::SetSpecularTexture(texture_t tex) {
   DefineValue(SPECULAR_MACRO);
   SetProperty(SPECULAR_TEXTURE, tex);
+}
+
+void Material::SetParams(const MaterialParams& params) {
+  SetProperty("uShininess", params.Shininess);
+  SetProperty("uAlbedo", params.Albedo);
+  SetProperty("uSpecular", params.Specular);
+
+  if (params.DiffuseTexture != "") {
+    auto tex = Texture::NewTexture(params.DiffuseTexture, kMainTex);
+    SetDiffuseTexture(tex);
+  }
+  if (params.SpecularTexture != "") {
+    auto tex = Texture::NewTexture(params.SpecularTexture, kMainTex);
+    SetSpecularTexture(tex);
+  }
 }
 
 void MaterialStart() {}

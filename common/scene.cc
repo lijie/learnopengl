@@ -77,13 +77,6 @@ void Scene::UpdateMaterialProperties(RendererPtr renderer, const SceneCommonUnif
   material->SetProperty("uModelView", model_view);
   material->SetProperty("uNormalMatrix", normal_matrix);
 
-  material->SetProperty("uSpecular", Vec3(1.0, 1.0, 1.0));
-  material->SetProperty("uShininess", 8.0f);
-  // material->SetProperty("uAmbientLight", Vec3(0.3, 0.3, 0.3));
-
-  // printf("view %s\n", glm::to_string(view).c_str());
-  // printf("view %s\n", glm::to_string(glm::mat3(view)).c_str());
-
   // set light uniforms
   light_manager_->SetUniforms(material, common_uniforms);
 
