@@ -85,8 +85,8 @@ class Shape : public Renderer {
     instance_num_ = num;
   }
 
-  void Render() override;
-  void Submit() override;
+  void Render(MaterialPtr mat) override;
+  void Submit(MaterialPtr mat) override;
   void Cleanup() override;
 
   int vbo() {return vbo_;}

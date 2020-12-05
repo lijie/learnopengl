@@ -65,6 +65,7 @@ class Shader {
   uint32_t fragment_shader_ = 0;
   uint32_t program_ = 0;
   std::string defined_values_ = "#version 330 core\n";
+  std::string shader_name_;
 
   int CheckCompileSuccess(uint32_t shader);
   int CheckLinkSuccess(uint32_t program);

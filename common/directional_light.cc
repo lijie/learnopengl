@@ -3,6 +3,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include "material.h"
 #include "scene.h"
+#include "render_context.h"
 
 void DirectionalLight::SetUniforms(std::shared_ptr<Material> mat,
                                    const SceneCommonUniforms& common_uniforms) {

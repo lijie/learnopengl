@@ -14,10 +14,8 @@ class Framebuffer;
 class LightManager;
 class Light;
 
-struct SceneCommonUniforms {
-  Mat4 ViewMatrix;
-  Mat4 ProjectionMatrix;
-};
+struct SceneCommonUniforms;
+struct RenderContext;
 
 class Scene {
  public:
@@ -45,8 +43,10 @@ class Scene {
     }
   }
 
-  void Render(GlContext *ctx, std::shared_ptr<Framebuffer> target_buffer = nullptr);
+  void Render(GlContext *ctx);
   void AddLight(std::shared_ptr<Light> light);
+
+  void SetTestShape(std::shared_ptr<Shape> shape) {test_shape_ = shape;}
 
  private:
   Camera *camera_ = nullptr;
@@ -56,8 +56,19 @@ class Scene {
   // std::shared_ptr<LightSource> light_source_;
   std::shared_ptr<Transform> target_ = nullptr;
 
+  // framebuffers
+  std::shared_ptr<Framebuffer> depth_framebuffer_ = nullptr;
+
+  // materials
+  MaterialPtr depthmap_material_ = nullptr;
+
+  std::shared_ptr<Shape> test_shape_ = nullptr;
+
   void SortRenderer();
-  void UpdateMaterialProperties(RendererPtr renderer, const SceneCommonUniforms &common_uniforms);
+  void UpdateMaterialProperties(RendererPtr renderer, MaterialPtr material, const RenderContext& context);
+  void ShadowDepthMapPass();
+  void DrawPass();
+  void Draw(RenderContext *context);
 };
 
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

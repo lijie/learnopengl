@@ -130,6 +130,22 @@ static void init_cube1(GlContext *c) {
   cube->Translate(Vec3(0.0f, -3.5f, 0.0f));
   cube->Scale(Vec3(20.0f, 0.5, 20.0));
   GetWorld()->AddRenderer(cube);
+  cube->set_display_name("cube1");
+}
+
+static void init_cube2(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = NewSharedObject<UnlitMaterial>();
+
+  MaterialParams params;
+  params.Albedo = Vec3(0.6, 0.2, 0.2);
+  mat->SetParams(params);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(-4.0f, 0.0f, 0.0f));
+  GetWorld()->AddRenderer(cube);
+  GetWorld()->SetTestShape(cube);
+  cube->set_display_name("cube2");
 }
 
 static void init_model(GlContext *c) {
@@ -140,6 +156,7 @@ static void init_model(GlContext *c) {
   std::string path = "../models/sphere.obj";
   model->Load(path, "", false, false);
   GetWorld()->AddRenderer(model);
+  model->set_display_name("sphere");
 }
 
 static PointLightPtr rotated_point_light;
@@ -153,7 +170,7 @@ static void rotate_point_light() {
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
-  Camera *camera = new Camera(Vec3(0.0, 0.0, 10.0), Vec3(0, 1, 0), 45.0,
+  Camera *camera = new Camera(Vec3(0.0, 0.0, 10.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
                               (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
@@ -169,6 +186,8 @@ static void init_scene(GlContext *c) {
   GetWorld()->AddLight(point_light);
   rotated_point_light = point_light;
 
+  // camera->set_position(point_light->GetTransform()->position());
+
   // auto light_source = std::make_shared<LightSource>();
   // GetWorld()->AddLightSource(light_source);
 
@@ -178,6 +197,7 @@ static void init_scene(GlContext *c) {
   // light_source->set_power(500);
 
   init_cube1(c);
+  init_cube2(c);
   init_model(c);
 }
 
@@ -225,6 +245,8 @@ int main() {
   // glEnable(GL_BLEND);
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  int frame_count = 0;
+
   while (!glfwWindowShouldClose(window)) {
     last_frame_time = current_frame_time;
     current_frame_time = glfwGetTime();
@@ -238,6 +260,10 @@ int main() {
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    frame_count++;
+    // if (frame_count > 1)
+    //   break;
   }
 
   GlobalFinish();

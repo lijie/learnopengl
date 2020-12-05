@@ -32,16 +32,25 @@ std::shared_ptr<T> NewSharedObject(Ts ...args) {
 }
 
 class Material;
+class Texture;
 class Shader;
 class Renderer;
 class Light;
 
 typedef std::shared_ptr<Material> MaterialPtr;
+typedef std::shared_ptr<Texture> TexturePtr;
 typedef std::shared_ptr<Shader> ShaderPtr;
 typedef std::shared_ptr<Renderer> RendererPtr;
 typedef std::shared_ptr<Light> LightPtr;
 
 #define COLOR_WHITE Vec3(1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK Vec3(0.0f, 0.0f, 0.0f)
+
+extern int glCheckError(const char *file, int line);
+#if 1
+#define CHECK_GL_ERROR  glCheckError(__FILE__, __LINE__)
+#else
+#define CHECK_GL_ERROR
+#endif
 
 #endif  // __LEARNOPENGL_LO_COMMON_H__

@@ -12,7 +12,7 @@ enum CameraKey {
 
 class Camera {
  public:
-  Camera(const Vec3& pos, const Vec3& up, double fov, double aspect_ratio = 1.0);
+  Camera(const Vec3& pos, const Vec3& up, const Vec3& target, double fov, double aspect_ratio = 1.0);
   Mat4 GetViewMatrix();
   Mat4 GetProjectionMatrix();
   double fov() { return fov_; };
@@ -21,6 +21,7 @@ class Camera {
   void ProcessMouse(double delta_x, double delta_y);
 
   Vec3 position() { return position_; }
+  void set_position(const Vec3& pos);
 
   private:
     Vec3 position_;

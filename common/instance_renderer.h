@@ -9,8 +9,8 @@ class InstanceRenderer : public Shape {
  public:
   InstanceRenderer(std::shared_ptr<Shape> r, unsigned int num);
   ~InstanceRenderer();
-  void Submit() override;
-  void Render() override;
+  void Submit(MaterialPtr mat) override;
+  void Render(MaterialPtr mat) override;
   void Cleanup() override;
 
   void SetModel(unsigned int idx, const Mat4& model) {

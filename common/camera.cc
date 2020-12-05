@@ -4,15 +4,14 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/string_cast.hpp"
 
-Camera::Camera(const Vec3& pos, const Vec3& up, double fov,
+Camera::Camera(const Vec3& pos, const Vec3& up, const Vec3& target, double fov,
                double aspect_ratio) {
   position_ = pos;
   world_up_ = up;
   fov_ = fov;
   aspect_ratio_ = aspect_ratio;
 
-  // look at pos 0 default
-  look_target_ = Vec3(0.0);
+  look_target_ = target;
 
   UpdateVectors();
 }
@@ -23,6 +22,11 @@ Mat4 Camera::GetViewMatrix() {
 
 Mat4 Camera::GetProjectionMatrix() {
   return glm::perspective(glm::radians(fov()), aspect_ratio_, 0.1, 1000.0);
+}
+
+void Camera::set_position(const Vec3& pos) {
+  position_ = pos;
+  UpdateVectors();
 }
 
 void Camera::UpdateVectors() {
@@ -36,8 +40,8 @@ void Camera::UpdateVectors() {
 #endif
 
   front_ = glm::normalize(direction);
-  // printf("camera front: %s\n", glm::to_string(front_).c_str());
-  // printf("position: %s\n", glm::to_string(position_).c_str());
+  printf("camera front: %s\n", glm::to_string(front_).c_str());
+  printf("position: %s\n", glm::to_string(position_).c_str());
 
   // 右手准则
   right_ = glm::normalize(glm::cross(front_, world_up_));

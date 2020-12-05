@@ -9,14 +9,20 @@
 
 Shape::Shape() {
   glGenVertexArrays(1, &vao_);
+  CHECK_GL_ERROR;
   glGenBuffers(1, &vbo_);
+  CHECK_GL_ERROR;
   glGenBuffers(1, &ebo_);
+  CHECK_GL_ERROR;
 }
 
 Shape::~Shape() {
   glDeleteVertexArrays(1, &vao_);
+  CHECK_GL_ERROR;
   glDeleteBuffers(1, &vbo_);
+  CHECK_GL_ERROR;
   glDeleteBuffers(1, &ebo_);
+  CHECK_GL_ERROR;
 }
 
 void Shape::Translate(const Vec3& v) {
@@ -29,24 +35,31 @@ void Shape::Scale(const Vec3& v) {
   // model_ = glm::scale(model_, v);
 }
 
-void Shape::Render() {
+void Shape::Render(MaterialPtr mat) {
   glBindVertexArray(vao_);
+  CHECK_GL_ERROR;
   if (enable_instance_) {
     glDrawArraysInstanced(GL_TRIANGLES, 0, vertex_size_, instance_num_);
+    CHECK_GL_ERROR;
     // glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
   } else {
     glDrawArrays(GL_TRIANGLES, 0, vertex_size_);
+    CHECK_GL_ERROR;
   }
 }
 
-void Shape::Submit() {
-  material_->UseShader(this);
+void Shape::Submit(MaterialPtr mat) {
+  mat->UseShader();
 
+  printf("use vao %d\n", vao_);
   glBindVertexArray(vao_);
+  CHECK_GL_ERROR;
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+  CHECK_GL_ERROR;
 
   auto size = vertex_size_ * 8 * sizeof(float);
   glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
+  CHECK_GL_ERROR;
 
 #if 0
   for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
@@ -67,20 +80,24 @@ void Shape::Submit() {
 
     if (attr.external_vbo >= 0) {
       glBindBuffer(GL_ARRAY_BUFFER, attr.external_vbo);
+      CHECK_GL_ERROR;
     }
 
     if (attr.attr_name.length() == 0) {
       assert(0);
     }
 
-    auto loc = material_->shader->GetAttribLocation(attr.attr_name.c_str());
+    auto loc = mat->shader->GetAttribLocation(attr.attr_name.c_str());
     // printf("attr localtion: %s, %d\n", attr.attr_name.c_str(), loc);
     if (loc < 0)
       continue;
     glEnableVertexAttribArray(loc);
+    CHECK_GL_ERROR;
     glVertexAttribPointer(loc, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
+    CHECK_GL_ERROR;
   }
-  glBindVertexArray(0);
+  // glBindVertexArray(0);
+  // CHECK_GL_ERROR;
 
   if (before_render_func_ != nullptr)
     before_render_func_();

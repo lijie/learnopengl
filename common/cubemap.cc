@@ -99,9 +99,9 @@ CubeMap::CubeMap(const std::vector<std::string> &path) {
     set_material(mat);
 }
 
-void CubeMap::Submit() {
+void CubeMap::Submit(MaterialPtr mat) {
     glm::mat4 view = glm::mat4(glm::mat3(GetWorld()->GetCamera()->GetViewMatrix()));
     material_->SetProperty("view", view);
 
-    Shape::Submit();
+    Shape::Submit(mat);
 }

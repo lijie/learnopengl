@@ -35,6 +35,6 @@ void InstanceRenderer::Ready() {
   shape_->enable_instance(true, num_);
 }
 
-void InstanceRenderer::Render() { shape_->Render(); }
-void InstanceRenderer::Submit() { shape_->Submit(); }
+void InstanceRenderer::Render(MaterialPtr mat) { shape_->Render(mat); }
+void InstanceRenderer::Submit(MaterialPtr mat) { shape_->Submit(mat); }
 void InstanceRenderer::Cleanup() { shape_->Cleanup(); }

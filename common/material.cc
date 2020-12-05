@@ -27,7 +27,9 @@ material_t Material::FindMaterial(const std::string& name) {
 
 static std::map<std::string, texture_t> TextureCollections;
 
-Texture::~Texture() { glDeleteTextures(1, (const GLuint*)&texture_id); }
+Texture::~Texture() {
+  glDeleteTextures(1, (const GLuint*)&texture_id);
+}
 
 void Texture::SetupTexture() {
   // check texture id
@@ -94,6 +96,7 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
 std::shared_ptr<Texture> Texture::NewTextureWithTextureId(int tex_id) {
   texture_t tex = std::make_shared<Texture>();
   tex->texture_id = tex_id;
+  fprintf(stdout, "Texutre: Generate texture with id %d\n", tex->texture_id);
   return tex;
 }
 
@@ -114,41 +117,53 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
     auto raw_value = std::any_cast<float>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform1f(loc, raw_value);
+    CHECK_GL_ERROR;
   } else if (value.type() == typeid(glm::vec3)) {
     auto raw_value = std::any_cast<glm::vec3>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
+    CHECK_GL_ERROR;
   } else if (value.type() == typeid(glm::vec4)) {
     auto raw_value = std::any_cast<glm::vec4>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
+    CHECK_GL_ERROR;
   } else if (value.type() == typeid(glm::mat4)) {
     auto raw_value = std::any_cast<glm::mat4>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0)
       glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+    CHECK_GL_ERROR;
   } else if (value.type() == typeid(glm::mat3)) {
     auto raw_value = std::any_cast<glm::mat3>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0)
       glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(raw_value));
+    CHECK_GL_ERROR;
   } else if (value.type() == typeid(std::shared_ptr<Texture>)) {
     auto raw_value = std::any_cast<std::shared_ptr<Texture>>(value);
     if (shader->SetUniformValues(name.c_str(), *texture_unit_index) >= 0) {
+      CHECK_GL_ERROR;
       glActiveTexture(GL_TEXTURE0 + *texture_unit_index);
+      CHECK_GL_ERROR;
       if (raw_value->is_cube_map) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, raw_value->texture_id);
+        CHECK_GL_ERROR;
       } else {
         glBindTexture(GL_TEXTURE_2D, raw_value->texture_id);
+        CHECK_GL_ERROR;
       }
       (*texture_unit_index)++;
+    } else {
+      printf("active texutre sampler unit %d failed.\n", *texture_unit_index);
+      assert(0);
     }
   } else {
     assert(0);
   }
 }
 
-void Material::UpdateShaderUniforms(Transform* t) {
+void Material::UpdateShaderUniforms() {
   // TODO...
   SetProperty("phong_exponent", 5.0f);
 
@@ -168,9 +183,9 @@ void Material::DefineValue(const std::string& name, int val) {
   shader->DefineValue(name, val);
 }
 
-void Material::UseShader(Transform* t) {
+void Material::UseShader() {
   shader->Use();
-  UpdateShaderUniforms(t);
+  UpdateShaderUniforms();
 }
 
 void Material::SetDiffuseTexture(texture_t tex) {
@@ -199,6 +214,12 @@ void Material::SetParams(const MaterialParams& params) {
   if (params.SpecularTexture != "") {
     auto tex = Texture::NewTexture(params.SpecularTexture, kMainTex);
     SetSpecularTexture(tex);
+  }
+  if (params.DiffuseTexturePtr != nullptr) {
+    SetDiffuseTexture(params.DiffuseTexturePtr);
+  }
+  if (params.SpecularTexturePtr != nullptr) {
+    SetDiffuseTexture(params.SpecularTexturePtr);
   }
 }
 

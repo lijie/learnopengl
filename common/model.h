@@ -13,13 +13,15 @@ class GlContext;
 
 class Model : public Renderer {
  public:
-  Model() {}
+  Model() {
+      visible_ = false;
+  }
   bool Load(const std::string &path, const std::string& texture_location,
       bool gamma = false, bool flip_uv = true);
   // std::vector<Mesh *> meshes;
 
-  void Render() override;
-  void Submit() override {}
+  void Render(MaterialPtr mat) override;
+  void Submit(MaterialPtr mat) override {}
 
  private:
   std::string directory_;

@@ -15,7 +15,7 @@ class CubeMap : public Shape {
   CubeMap(const std::vector<std::string> &path);
 
   // void Render() override;
-  void Submit() override;
+  void Submit(MaterialPtr mat) override;
 
  private:
   int texture_id_;

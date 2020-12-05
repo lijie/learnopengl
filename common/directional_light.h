@@ -47,7 +47,7 @@ class DirectionalLight : public Light {
   void set_target(const Vec3& target) { target_ = target; }
 
   const Vec3& target() { return target_; }
-  const Vec3& direction() { return target_ - transform_.position(); }
+  Vec3 direction() { return target_ - transform_.position(); }
   const Vec3& color() { return color_; }
 
   void SetUniforms(MaterialPtr mat,

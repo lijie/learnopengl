@@ -25,8 +25,8 @@ class Mesh : public Renderer {
   // std::vector<Texture> textures;
   // std::shared_ptr<Material> material;
 
-  void Render() override;
-  void Submit() override;
+  void Render(MaterialPtr mat) override;
+  void Submit(MaterialPtr mat) override;
 
  private:
   unsigned int vao, vbo, ebo;

@@ -20,14 +20,20 @@ static std::string GetUniformName(TextureType type, int idx) {
 Mesh::Mesh() {
   // create buffers/arrays
   glGenVertexArrays(1, &vao);
+  CHECK_GL_ERROR;
   glGenBuffers(1, &vbo);
+  CHECK_GL_ERROR;
   glGenBuffers(1, &ebo);
+  CHECK_GL_ERROR;
 }
 
 Mesh::~Mesh() {
   glDeleteVertexArrays(1, &vao);
+  CHECK_GL_ERROR;
   glDeleteBuffers(1, &vbo);
+  CHECK_GL_ERROR;
   glDeleteBuffers(1, &ebo);
+  CHECK_GL_ERROR;
   submit_done_ = false;
 }
 
@@ -70,14 +76,14 @@ static void InitShader(GlContext *c, std::shared_ptr<Shader> shader) {
 }
 #endif
 
-void Mesh::Render() {
+void Mesh::Render(MaterialPtr mat) {
 #if 1
   int diffuse_idx = 0;
   int specular_idx = 0;
   int normal_idx = 0;
   std::string name;
-  for (int i = 0; i < material_->textures.size(); i++) {
-    auto tex = material_->textures[i];
+  for (int i = 0; i < mat->textures.size(); i++) {
+    auto tex = mat->textures[i];
     if (tex->type == kDiffuseTex) {
       name = "diffuseTexture" + std::to_string(diffuse_idx);
       diffuse_idx++;
@@ -90,7 +96,7 @@ void Mesh::Render() {
     } else {
       assert(0);
     }
-    if (material_->shader->SetUniformValues(name.c_str(), i) >= 0) {
+    if (mat->shader->SetUniformValues(name.c_str(), i) >= 0) {
       glActiveTexture(GL_TEXTURE0 + i);
       glBindTexture(GL_TEXTURE_2D, tex->texture_id);
     } else {
@@ -107,43 +113,57 @@ void Mesh::Render() {
 }
 
 // Submit data to GPU
-void Mesh::Submit() {
-  material_->UseShader(this);
+void Mesh::Submit(MaterialPtr mat) {
+  mat->UseShader();
   // if (submit_done_) return;
   glBindVertexArray(vao);
+  CHECK_GL_ERROR;
   // load data into vertex buffers
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  CHECK_GL_ERROR;
   // A great thing about structs is that their memory layout is sequential for
   // all its items. The effect is that we can simply pass a pointer to the
   // struct and it translates perfectly to a glm::vec3/2 array which again
   // translates to 3/2 floats which translates to a byte array.
   glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0],
                GL_STATIC_DRAW);
-
+  CHECK_GL_ERROR;
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  CHECK_GL_ERROR;
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
                &indices[0], GL_STATIC_DRAW);
+               CHECK_GL_ERROR;
 
   // set the vertex attribute pointers
   // vertex Positions
   glEnableVertexAttribArray(0);
+  CHECK_GL_ERROR;
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+  CHECK_GL_ERROR;
   // vertex normals
   glEnableVertexAttribArray(1);
+  CHECK_GL_ERROR;
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Normal));
+                        CHECK_GL_ERROR;
   // vertex texture coords
   glEnableVertexAttribArray(2);
+  CHECK_GL_ERROR;
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, TexCoord));
+                        CHECK_GL_ERROR;
   // vertex tangent
   glEnableVertexAttribArray(3);
+  CHECK_GL_ERROR;
   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Tangent));
+                        CHECK_GL_ERROR;
   // vertex bitangent
   glEnableVertexAttribArray(4);
+  CHECK_GL_ERROR;
   glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Bitangent));
+                        CHECK_GL_ERROR;
 
   // glBindVertexArray(0);
   submit_done_ = true;

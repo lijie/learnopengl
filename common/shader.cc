@@ -40,6 +40,7 @@ std::shared_ptr<Shader> Shader::NewShader(const std::string &shader_name) {
 
   auto shader = std::make_shared<Shader>();
   shader->Open(v_path.c_str(), f_path.c_str());
+  shader->shader_name_ = shader_name;
 #if 0
   bool res = shader->CompileAndLink();
   if (!res) {
@@ -52,7 +53,10 @@ std::shared_ptr<Shader> Shader::NewShader(const std::string &shader_name) {
 
 static const char *read_file(const char *path) {
   FILE *f = fopen(path, "r");
-  assert(f != NULL);
+  if (f == NULL) {
+    fprintf(stderr, "cannot open file %s\n", path);
+    assert(f != NULL);
+  }
 
   fseek(f, 0, SEEK_END);
   long size = ftell(f);
@@ -123,6 +127,7 @@ bool Shader::CompileAndLink() {
 
   bool res = false;
 
+  printf("use shader %s\n", shader_name_.c_str());
   if (flags_ & SHADER_FLAGS_ALREADY_COMPILE) {
     return true;
   }
@@ -140,8 +145,11 @@ bool Shader::CompileAndLink() {
   // printf("%s\n", f_src_ptr);
 
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  CHECK_GL_ERROR;
   glShaderSource(vertex_shader, 1, &v_src_ptr, NULL);
+  CHECK_GL_ERROR;
   glCompileShader(vertex_shader);
+  CHECK_GL_ERROR;
 
   if (!CheckCompileSuccess(vertex_shader)) {
     ERROR("vertex shader compile error.\n");
@@ -149,8 +157,11 @@ bool Shader::CompileAndLink() {
   }
 
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  CHECK_GL_ERROR;
   glShaderSource(fragment_shader, 1, &f_src_ptr, NULL);
+  CHECK_GL_ERROR;
   glCompileShader(fragment_shader);
+  CHECK_GL_ERROR;
 
   if (!CheckCompileSuccess(fragment_shader)) {
     ERROR("fragment shader compile error.\n");
@@ -158,9 +169,13 @@ bool Shader::CompileAndLink() {
   }
 
   shader_program = glCreateProgram();
+  CHECK_GL_ERROR;
   glAttachShader(shader_program, vertex_shader);
+  CHECK_GL_ERROR;
   glAttachShader(shader_program, fragment_shader);
+  CHECK_GL_ERROR;
   glLinkProgram(shader_program);
+  CHECK_GL_ERROR;
 
   if (!CheckLinkSuccess(shader_program)) {
     ERROR("shader link error.\n");
@@ -183,6 +198,7 @@ void Shader::Use() {
   bool res = CompileAndLink();
   assert(res != false);
   glUseProgram(program_);
+  CHECK_GL_ERROR;
 }
 
 int Shader::GetUniformLocation(const char *name) {

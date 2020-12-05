@@ -66,6 +66,8 @@ struct MaterialParams {
   Vec3 Specular;
   std::string DiffuseTexture;
   std::string SpecularTexture;
+  TexturePtr DiffuseTexturePtr;
+  TexturePtr SpecularTexturePtr;
 };
 
 #define MATERIAL_TEXTURE_NUM 16
@@ -86,7 +88,7 @@ class Material {
   // deprecated
   int texture_id[MATERIAL_TEXTURE_NUM];
 
-  void UseShader(Transform* t);
+  void UseShader();
 
   void SetProperty(const std::string& name, const std::any& value) {
     properties_[name] = value;
@@ -100,10 +102,14 @@ class Material {
   void SetNormalTexture(texture_t tex);
   void SetSpecularTexture(texture_t tex);
 
+  bool HasProperty(const std::string& name) {
+    return properties_.find(name) != properties_.end();
+  }
+
   void SetParams(const MaterialParams& params);
 
  private:
-  void UpdateShaderUniforms(Transform* t);
+  void UpdateShaderUniforms();
   std::map<std::string, std::any> properties_;
   std::unordered_map<std::string, int> valid_properties_;
 
@@ -117,6 +123,16 @@ typedef std::shared_ptr<Material> material_t;
 class PhongMaterial : public Material {
  public:
   PhongMaterial() : Material("../shaders/phong") {}
+};
+
+class DepthMapMaterial : public Material {
+  public:
+  DepthMapMaterial() : Material("../shaders/depthmap") {}
+};
+
+class UnlitMaterial : public Material {
+  public:
+  UnlitMaterial() : Material("../shaders/unlit") {}
 };
 
 // common uniform name

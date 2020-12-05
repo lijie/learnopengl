@@ -33,10 +33,11 @@ bool Model::Load(const std::string &path, const std::string& texture_location,
   return true;
 }
 
-void Model::Render() {
+void Model::Render(MaterialPtr material) {
   for (auto i = 0; i < children_.size(); i++) {
-    children_[i]->Submit();
-    children_[i]->Render();
+    auto mat = material == nullptr ? children_[i]->material() : material;
+    children_[i]->Submit(mat);
+    children_[i]->Render(mat);
   }
 }
 
