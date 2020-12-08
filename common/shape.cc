@@ -51,7 +51,6 @@ void Shape::Render(MaterialPtr mat) {
 void Shape::Submit(MaterialPtr mat) {
   mat->UseShader();
 
-  printf("use vao %d\n", vao_);
   glBindVertexArray(vao_);
   CHECK_GL_ERROR;
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);

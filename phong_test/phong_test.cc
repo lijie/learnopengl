@@ -128,7 +128,7 @@ static void init_cube1(GlContext *c) {
 
   cube->set_material(mat);
   cube->Translate(Vec3(0.0f, -3.5f, 0.0f));
-  cube->Scale(Vec3(20.0f, 0.5, 20.0));
+  cube->Scale(Vec3(100.0f, 1, 100.0));
   GetWorld()->AddRenderer(cube);
   cube->set_display_name("cube1");
 }
@@ -149,18 +149,30 @@ static void init_cube2(GlContext *c) {
 }
 
 static void init_model(GlContext *c) {
-  auto model = NewSharedObject<Model>();
-  // std::string path = "../models/nanosuit/nanosuit.obj";
-  // std::string path = "../models/the-lighthouse/scene.gltf";
-  // std::string path = "../models/station_b/scene.gltf";
-  std::string path = "../models/sphere.obj";
-  model->Load(path, "", false, false);
-  GetWorld()->AddRenderer(model);
-  model->set_display_name("sphere");
+  int count = 0;
+  int num = 3;
+  for (int x = 0; x < num; x++) {
+    for (int y = 0; y < num; y++) {
+      for (int z = 0; z < num; z++) {
+        auto model = NewSharedObject<Model>();
+        std::string path = "../models/sphere.obj";
+        // std::string path = "../models/nanosuit/nanosuit.obj";
+        // std::string path = "../models/backpack/backpack.obj";
+        model->Load(path, "", false, false);
+        model->set_position(Vec3(x * 10.0f, y * 10.0f, z * 10.0f));
+        // model->set_scale(Vec3(0.15));
+        GetWorld()->AddRenderer(model);
+        model->set_display_name("sphere");
+        count++;
+      }
+    }
+  }  
 }
 
-static PointLightPtr rotated_point_light;
+static PointLightPtr rotated_point_light = nullptr;
 static void rotate_point_light() {
+  if (rotated_point_light == nullptr)
+    return;
   auto tramsform = rotated_point_light->GetTransform();
   auto direction = glm::rotate(tramsform->position(), float(glm::radians(2.0)),
                                Vec3(0, 1, 0));
@@ -170,7 +182,7 @@ static void rotate_point_light() {
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
-  Camera *camera = new Camera(Vec3(0.0, 0.0, 10.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
+  Camera *camera = new Camera(Vec3(0.0, 0.0, 100.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
                               (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
@@ -178,11 +190,11 @@ static void init_scene(GlContext *c) {
       NewSharedObject<DirectionalLight>(Vec3(10.0f, 0.0f, 0.0f), COLOR_WHITE);
   GetWorld()->AddLight(directional_light);
 
-  auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.3, 0.3, 0.3));
+  auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.133, 0.133, 0.133));
   GetWorld()->AddLight(ambient_light);
 
   auto point_light = NewSharedObject<PointLight>(0, 0, COLOR_WHITE);
-  point_light->GetTransform()->set_position(Vec3(4.0f, 0.0f, 0.0f));
+  point_light->GetTransform()->set_position(Vec3(60.0f, 0.0f, 0.0f));
   GetWorld()->AddLight(point_light);
   rotated_point_light = point_light;
 

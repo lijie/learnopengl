@@ -154,8 +154,8 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 
   auto _material = NewSharedObject<PhongMaterial>();
   MaterialParams params;
-  params.Albedo = Vec3(1.0, 0.2, 0.2);
-  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Albedo = Vec3(0.64, 0.32, 0.32);
+  params.Specular = Vec3(0.2, 0.2, 0.2);
   params.Shininess = 1.0f;
   _material->SetParams(params);
   // return a mesh object created from the extracted mesh data
@@ -201,4 +201,21 @@ texture_t Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
 
   fprintf(stdout, "Load Texutre: %s\n", full_path.c_str());
   return Texture::NewTexture(full_path, type_alias);
+}
+
+void Model::set_position(const Vec3& v) {
+  Transform::set_position(v);
+  auto children = GetChildren();
+  for (size_t i = 0; i < children.size(); i++) {
+    auto child = children[i];
+    child->set_position(v);
+  }
+}
+void Model::set_scale(const Vec3& v) {
+  Transform::set_scale(v);
+  auto children = GetChildren();
+  for (size_t i = 0; i < children.size(); i++) {
+    auto child = children[i];
+    child->set_scale(v);
+  }
 }

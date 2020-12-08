@@ -10,28 +10,12 @@ in vec3 aTangent;
 in vec3 aBitangent;
 #endif
 
-// out vec3 vPositionWS;   // world space
 out vec2 vUV;
 out vec3 vNormal;
 out vec3 vViewPosition;      // position in view space
 
-// out vec3 CameraDirection_cs;   // camera spsace
-// out vec3 LightDirection_cs;    // camera space
-// out vec3 vCameraDirectionTS;    // tangent space
-// out vec3 vLightDirectionTS;     // tangent space
+#include chunks/common_uniforms.glsl
 
-uniform mat4 uModel;
-uniform mat4 uView;
-uniform mat4 uProjection;
-uniform mat3 uMV3x3;
-uniform mat4 uMVP;
-uniform mat4 uModelView;
-uniform mat3 uNormalMatrix;
-
-#ifdef FLAT_SHADED
-#endif
-
-// uniform vec3 light_position;     // world space
 void main()
 {
     vec3 transformedNormal = uNormalMatrix * aNormal;

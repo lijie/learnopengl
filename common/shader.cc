@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "shader_include.h"
 
 #include <GLFW/glfw3.h>
 #include <assert.h>
@@ -71,26 +72,29 @@ static const char *read_file(const char *path) {
 }
 
 Shader::~Shader() {
-  if (flags_ & SHADER_FLAGS_EXTERNAL_SOURCE) {
-    free((void *)vertex_source_);
-    free((void *)fragment_source_);
-  }
+  // if (flags_ & SHADER_FLAGS_EXTERNAL_SOURCE) {
+  //   free((void *)vertex_source_);
+  //   free((void *)fragment_source_);
+  // }
 }
 
-Shader::Shader(const char *v_src, const char *f_src) {
-  vertex_source_ = v_src;
-  fragment_source_ = f_src;
-  flags_ |= SHADER_FLAGS_EXTERNAL_SOURCE;
-}
+// Shader::Shader(const char *v_src, const char *f_src) {
+//   vertex_source_ = v_src;
+//   fragment_source_ = f_src;
+//   flags_ |= SHADER_FLAGS_EXTERNAL_SOURCE;
+// }
 
 bool Shader::Open(const char *v_path, const char *f_path) {
   if (flags_ & SHADER_FLAGS_ALREADY_READ) {
     return true;
   }
-  vertex_source_ = read_file(v_path);
-  fragment_source_ = read_file(f_path);
-  flags_ &= ~(SHADER_FLAGS_EXTERNAL_SOURCE);
-  flags_ |= SHADER_FLAGS_ALREADY_READ;
+  vertex_source_ = Shadinclude::load(std::string(v_path));
+  fragment_source_ = Shadinclude::load(std::string(f_path));
+
+  // vertex_source_ = read_file(v_path);
+  // fragment_source_ = read_file(f_path);
+  // flags_ &= ~(SHADER_FLAGS_EXTERNAL_SOURCE);
+  // flags_ |= SHADER_FLAGS_ALREADY_READ;
   return true;
 }
 
@@ -127,7 +131,7 @@ bool Shader::CompileAndLink() {
 
   bool res = false;
 
-  printf("use shader %s\n", shader_name_.c_str());
+  // printf("use shader %s\n", shader_name_.c_str());
   if (flags_ & SHADER_FLAGS_ALREADY_COMPILE) {
     return true;
   }
@@ -135,8 +139,8 @@ bool Shader::CompileAndLink() {
   std::string v_src;
   std::string f_src;
 
-  v_src = defined_values_ + std::string(vertex_source_);
-  f_src = defined_values_ + std::string(fragment_source_);
+  v_src = defined_values_ + vertex_source_;
+  f_src = defined_values_ + fragment_source_;
 
   const char *v_src_ptr = v_src.c_str();
   const char *f_src_ptr = f_src.c_str();

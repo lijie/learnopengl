@@ -24,7 +24,7 @@ class Renderer : public Transform {
   // update per frame
   void Update(MaterialPtr material) {
     // auto mat = material == nullptr ? material_ : material;
-    printf("render %s\n", display_name_.c_str());
+    // printf("render %s\n", display_name_.c_str());
     Submit(material);
     Render(material);
     Cleanup();

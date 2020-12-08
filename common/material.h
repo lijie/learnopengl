@@ -135,6 +135,11 @@ class UnlitMaterial : public Material {
   UnlitMaterial() : Material("../shaders/unlit") {}
 };
 
+class ToonMaterial : public Material {
+  public:
+  ToonMaterial() : Material("../shaders/toon") {}
+};
+
 // common uniform name
 #define DIFFUSE_TEXTURE "uDiffuseTexture"
 #define DIFFUSE_MACRO "USE_DIFFUSE_TEXTURE"

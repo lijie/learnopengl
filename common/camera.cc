@@ -40,8 +40,8 @@ void Camera::UpdateVectors() {
 #endif
 
   front_ = glm::normalize(direction);
-  printf("camera front: %s\n", glm::to_string(front_).c_str());
-  printf("position: %s\n", glm::to_string(position_).c_str());
+  // printf("camera front: %s\n", glm::to_string(front_).c_str());
+  // printf("position: %s\n", glm::to_string(position_).c_str());
 
   // 右手准则
   right_ = glm::normalize(glm::cross(front_, world_up_));

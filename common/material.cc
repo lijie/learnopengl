@@ -156,7 +156,7 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
       (*texture_unit_index)++;
     } else {
       printf("active texutre sampler unit %d failed.\n", *texture_unit_index);
-      assert(0);
+      // assert(0);
     }
   } else {
     assert(0);

@@ -13,7 +13,7 @@ class Transform;
 class Shader {
  public:
   Shader() {};
-  Shader(const char *v_src, const char *f_src);
+  // Shader(const char *v_src, const char *f_src);
   ~Shader();
   bool Open(const char *v_path, const char *f_path);
   bool CompileAndLink();
@@ -55,8 +55,10 @@ class Shader {
   static std::shared_ptr<Shader> NewShader(const std::string& shader_name);
 
  private:
-  const char *vertex_source_ = nullptr;
-  const char *fragment_source_ = nullptr;
+  // const char *vertex_source_ = nullptr;
+  // const char *fragment_source_ = nullptr;
+  std::string vertex_source_;
+  std::string fragment_source_;
 #define SHADER_FLAGS_EXTERNAL_SOURCE (1 << 0)
 #define SHADER_FLAGS_ALREADY_READ (1 << 1)
 #define SHADER_FLAGS_ALREADY_COMPILE (1 << 2)

@@ -23,6 +23,9 @@ class Model : public Renderer {
   void Render(MaterialPtr mat) override;
   void Submit(MaterialPtr mat) override {}
 
+  void set_position(const Vec3& v) override;
+  void set_scale(const Vec3& v) override;
+
  private:
   std::string directory_;
   bool enable_texture_location_ = false;
