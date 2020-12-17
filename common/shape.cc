@@ -51,29 +51,19 @@ void Shape::Render(MaterialPtr mat) {
 void Shape::Submit(MaterialPtr mat) {
   mat->UseShader();
 
-  glBindVertexArray(vao_);
-  CHECK_GL_ERROR;
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);
   CHECK_GL_ERROR;
 
-  auto size = vertex_size_ * 8 * sizeof(float);
-  glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
+  if (need_submit_) {
+    need_submit_ = false;
+    auto size = vertex_size_ * 8 * sizeof(float);
+    glBufferData(GL_ARRAY_BUFFER, size, vertices_, GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
+  }
+
+  glBindVertexArray(vao_);
   CHECK_GL_ERROR;
 
-#if 0
-  for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
-    const VAOAttr& attr = vao_attr_vec_[i];
-
-    if (attr.external_vbo >= 0) {
-      glBindBuffer(GL_ARRAY_BUFFER, attr.external_vbo);
-    }
-    glVertexAttribPointer(i, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
-    glEnableVertexAttribArray(i);
-    if (attr.divisor > 0) {
-      glVertexAttribDivisor(i, attr.divisor);
-    }
-  }
-#endif
   for (size_t i = 0; i < vao_attr_vec_.size(); i++) {
     const VAOAttr& attr = vao_attr_vec_[i];
 
@@ -88,18 +78,17 @@ void Shape::Submit(MaterialPtr mat) {
 
     auto loc = mat->shader->GetAttribLocation(attr.attr_name.c_str());
     // printf("attr localtion: %s, %d\n", attr.attr_name.c_str(), loc);
-    if (loc < 0)
-      continue;
+    if (loc < 0) continue;
     glEnableVertexAttribArray(loc);
     CHECK_GL_ERROR;
-    glVertexAttribPointer(loc, attr.size, attr.type, attr.normalize, attr.stride, (void *)attr.offset);
+    glVertexAttribPointer(loc, attr.size, attr.type, attr.normalize,
+                          attr.stride, (void*)attr.offset);
     CHECK_GL_ERROR;
   }
   // glBindVertexArray(0);
   // CHECK_GL_ERROR;
 
-  if (before_render_func_ != nullptr)
-    before_render_func_();
+  if (before_render_func_ != nullptr) before_render_func_();
 }
 
 void Shape::Cleanup() {

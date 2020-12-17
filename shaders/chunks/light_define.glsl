@@ -100,8 +100,10 @@ void RreflectDirectBlinnPhong(
     #ifndef PHYSICALLY_CORRECT_LIGHTS
         irradiance *= PI;
     #endif
+    // testColor = material.diffuseColor.rgb;
     reflectedLight.directDiffuse +=
         irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
+    testColor = reflectedLight.directDiffuse;
     reflectedLight.directSpecular += 
         irradiance * BRDF_Specular_BlinnPhong(directLight, geometry, material.specularColor, material.specularShininess) * material.specularStrength;
 }
@@ -142,6 +144,34 @@ void getPointDirectLightIrradiance( const in PointLight pointLight, const in Geo
     directLight.color = pointLight.color;
     directLight.color *= punctualLightIntensityToIrradianceFactor( lightDistance, pointLight.distance, pointLight.decay );
     directLight.visible = (directLight.color != vec3(0.0));
+}
+#endif
+
+#if SPOT_LIGHT_NUM > 0
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    float distance;
+    float decay;
+    float coneCos;
+    float penumbraCos;
+};
+uniform SpotLight spotLights[SPOT_LIGHT_NUM];
+void getSpotDirectLightIrradiance(const in SpotLight spotLight, const in GeometricContext geometry, out IncidentLight directLight) {
+    vec3 lvector = spotLight.position - geometry.position;
+    directLight.direction = normalize(lvector);
+    float distance = length(lvector);
+    float angleCos = dot(-directLight.direction, spotLight.direction);
+    if (angleCos > spotLight.coneCos) {
+        float spotEffect = smoothstep(spotLight.coneCos, spotLight.penumbraCos, angleCos);
+        directLight.color = spotLight.color;
+        directLight.color *= spotEffect * punctualLightIntensityToIrradianceFactor(distance, spotLight.distance, spotLight.decay);
+        directLight.visible = true;
+    } else {
+        directLight.color = vec3(0.0);
+        directLight.visible = false;
+    }
 }
 #endif
 

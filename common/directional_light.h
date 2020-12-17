@@ -6,11 +6,13 @@
 
 #include "lo_common.h"
 #include "transform.h"
+#include "renderer.h"
 
 enum LightType {
   kDirectionalLight = 1,
   kPointLight = 2,
   kAmbientLight = 3,
+  kSpotLight = 4,
 };
 
 struct SceneCommonUniforms;
@@ -88,6 +90,42 @@ class AmbientLight : public Light {
   Vec3 color_;
 };
 
+class SpotLight : public Light {
+ public:
+  SpotLight(float distance, float decay, const Vec3& color, float cone = glm::pi<float>() / 6.0f, float penumbra = 0.0f)
+      : Light(kSpotLight), distance_(distance), decay_(decay), cone_(cone), penumbra_(penumbra) {
+    set_color(color);
+  }
+
+  void set_target(const Vec3& target) { target_ = target; }
+
+  const Vec3& target() { return target_; }
+  Vec3 direction() { return target_ - transform_.position(); }
+  const Vec3& color() { return color_; }
+
+  void SetUniforms(MaterialPtr mat,
+                   const SceneCommonUniforms& common_uniforms) override;
+
+ private:
+  Vec3 target_;
+  float distance_ = 0.0f;
+  float decay_ = 1.0f;
+  float cone_ = glm::pi<float>() / 6.0f; // 本影, 角度(弧度)
+  float penumbra_ = 0.0f;         // 半影, [0, 1], 所占本影区域的百分比
+};
+
+typedef std::shared_ptr<SpotLight> SpotLightPtr;
+
+class LightHelper : public Renderer {
+ public:
+  LightHelper(LightPtr light);
+  void BeforeUpdate() override;
+
+ private:
+  ShapePtr shape_;
+  LightPtr light_;
+};
+
 class LightManager {
  public:
   void AddLight(LightPtr light);
@@ -96,6 +134,7 @@ class LightManager {
  private:
   int directional_light_index_ = 0;
   int point_light_index_ = 0;
+  int spot_light_index_ = 0;
 
   std::vector<LightPtr> light_vec_;
 };

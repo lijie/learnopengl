@@ -125,14 +125,17 @@ void Mesh::Submit(MaterialPtr mat) {
   // all its items. The effect is that we can simply pass a pointer to the
   // struct and it translates perfectly to a glm::vec3/2 array which again
   // translates to 3/2 floats which translates to a byte array.
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0],
-               GL_STATIC_DRAW);
-  CHECK_GL_ERROR;
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  CHECK_GL_ERROR;
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-               &indices[0], GL_STATIC_DRAW);
-               CHECK_GL_ERROR;
+  if (need_submit_) {
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex),
+                 &vertices[0], GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    CHECK_GL_ERROR;
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+                 &indices[0], GL_STATIC_DRAW);
+    CHECK_GL_ERROR;
+    need_submit_ = false;
+  }
 
   // set the vertex attribute pointers
   // vertex Positions
@@ -145,25 +148,25 @@ void Mesh::Submit(MaterialPtr mat) {
   CHECK_GL_ERROR;
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Normal));
-                        CHECK_GL_ERROR;
+  CHECK_GL_ERROR;
   // vertex texture coords
   glEnableVertexAttribArray(2);
   CHECK_GL_ERROR;
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, TexCoord));
-                        CHECK_GL_ERROR;
+  CHECK_GL_ERROR;
   // vertex tangent
   glEnableVertexAttribArray(3);
   CHECK_GL_ERROR;
   glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Tangent));
-                        CHECK_GL_ERROR;
+  CHECK_GL_ERROR;
   // vertex bitangent
   glEnableVertexAttribArray(4);
   CHECK_GL_ERROR;
   glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         (void *)offsetof(Vertex, Bitangent));
-                        CHECK_GL_ERROR;
+  CHECK_GL_ERROR;
 
   // glBindVertexArray(0);
   submit_done_ = true;

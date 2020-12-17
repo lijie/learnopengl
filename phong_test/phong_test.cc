@@ -114,21 +114,93 @@ glm::vec3 light_position(1.2f, -1.0f, 2.0f);
 
 glm::vec3 cube_albedo(1.0f, 1.0f, 1.0f);
 
-static void init_cube1(GlContext *c) {
+static void init_cube_bottom(GlContext *c) {
   auto cube = make_shared<Cube>();
   auto mat = NewSharedObject<PhongMaterial>();
 
   MaterialParams params;
-  params.Albedo = Vec3(0.6, 0.2, 0.2);
+  params.Albedo = Vec3(0.8, 0.8, 0.8);
   params.Specular = Vec3(1.0, 1.0, 1.0);
   params.Shininess = 1.0f;
-  params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
-  params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  // params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  // params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
   mat->SetParams(params);
 
   cube->set_material(mat);
-  cube->Translate(Vec3(0.0f, -3.5f, 0.0f));
-  cube->Scale(Vec3(100.0f, 1, 100.0));
+  cube->Translate(Vec3(0.0f, -10.0f, 0.0f));
+  cube->Scale(Vec3(20.0f, 1, 20.0));
+  GetWorld()->AddRenderer(cube);
+  cube->set_display_name("cube1");
+}
+static void init_cube_top(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = NewSharedObject<PhongMaterial>();
+
+  MaterialParams params;
+  params.Albedo = Vec3(0.8, 0.8, 0.8);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  // params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  // params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  mat->SetParams(params);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(0.0f, 10.0f, 0.0f));
+  cube->Scale(Vec3(20.0f, 1, 20.0));
+  GetWorld()->AddRenderer(cube);
+  cube->set_display_name("cube1");
+}
+static void init_cube_left(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = NewSharedObject<PhongMaterial>();
+
+  MaterialParams params;
+  params.Albedo = Vec3(1.0, 0.0, 0.0);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  // params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  // params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  mat->SetParams(params);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(-10.0f, 0.0f, 0.0f));
+  cube->Scale(Vec3(1.0f, 20.0f, 20.0f));
+  GetWorld()->AddRenderer(cube);
+  cube->set_display_name("cube1");
+}
+static void init_cube_right(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = NewSharedObject<PhongMaterial>();
+
+  MaterialParams params;
+  params.Albedo = Vec3(0.0, 1.0, 0.0);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  // params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  // params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  mat->SetParams(params);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(10.0f, 0.0f, 0.0f));
+  cube->Scale(Vec3(1.0f, 20.0f, 20.0f));
+  GetWorld()->AddRenderer(cube);
+  cube->set_display_name("cube1");
+}
+static void init_cube_back(GlContext *c) {
+  auto cube = make_shared<Cube>();
+  auto mat = NewSharedObject<PhongMaterial>();
+
+  MaterialParams params;
+  params.Albedo = Vec3(0.0, 0.0, 1.0);
+  params.Specular = Vec3(1.0, 1.0, 1.0);
+  params.Shininess = 1.0f;
+  // params.DiffuseTexture = "../texture/tmtjfd0r_2K_Albedo.jpg";
+  // params.SpecularTexture = "../texture/tmtjfd0r_2K_Specular.jpg";
+  mat->SetParams(params);
+
+  cube->set_material(mat);
+  cube->Translate(Vec3(0.0f, 0.0f, -10.0f));
+  cube->Scale(Vec3(20.0f, 20.0f, 1.0f));
   GetWorld()->AddRenderer(cube);
   cube->set_display_name("cube1");
 }
@@ -150,7 +222,7 @@ static void init_cube2(GlContext *c) {
 
 static void init_model(GlContext *c) {
   int count = 0;
-  int num = 3;
+  int num = 1;
   for (int x = 0; x < num; x++) {
     for (int y = 0; y < num; y++) {
       for (int z = 0; z < num; z++) {
@@ -179,24 +251,47 @@ static void rotate_point_light() {
   tramsform->set_position(direction);
 }
 
+static SpotLightPtr rotated_spot_light = nullptr;
+static void rotate_spot_light() {
+  if (rotated_spot_light == nullptr)
+    return;
+  auto tramsform = rotated_spot_light->GetTransform();
+  auto direction = glm::rotate(tramsform->position(), float(glm::radians(2.0)),
+                               Vec3(0, 1, 0));
+  tramsform->set_position(direction);
+}
+
+
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
-  Camera *camera = new Camera(Vec3(0.0, 0.0, 100.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
+  Camera *camera = new Camera(Vec3(0.0, 0.0, 35.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
                               (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  auto directional_light =
-      NewSharedObject<DirectionalLight>(Vec3(10.0f, 0.0f, 0.0f), COLOR_WHITE);
-  GetWorld()->AddLight(directional_light);
+  // auto directional_light =
+  //     NewSharedObject<DirectionalLight>(Vec3(0.0f, 0.0f, 0.0f), COLOR_WHITE);
+  // directional_light->GetTransform()->set_position(Vec3(-5.0f, 5.0f, 0.0f));
+  // GetWorld()->AddLight(directional_light);
 
   auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.133, 0.133, 0.133));
   GetWorld()->AddLight(ambient_light);
 
-  auto point_light = NewSharedObject<PointLight>(0, 0, COLOR_WHITE);
-  point_light->GetTransform()->set_position(Vec3(60.0f, 0.0f, 0.0f));
-  GetWorld()->AddLight(point_light);
-  rotated_point_light = point_light;
+  // auto point_light = NewSharedObject<PointLight>(0, 0, COLOR_WHITE);
+  // point_light->GetTransform()->set_position(Vec3(7.0f, 0.0f, 0.0f));
+  // GetWorld()->AddLight(point_light);
+  // rotated_point_light = point_light;
+
+  auto spot_light = NewSharedObject<SpotLight>(0, 0, COLOR_WHITE);
+  spot_light->GetTransform()->set_position(Vec3(0.0f, 7.0f, 0.0f));
+
+  spot_light->set_target(Vec3(0.0f, 0.0f, 0.0f));
+
+  GetWorld()->AddLight(spot_light);
+  rotated_spot_light = spot_light;
+
+  auto spot_light_helper = NewSharedObject<LightHelper>(spot_light);
+  GetWorld()->AddRenderer(spot_light_helper);
 
   // camera->set_position(point_light->GetTransform()->position());
 
@@ -208,14 +303,19 @@ static void init_scene(GlContext *c) {
   // light_source->Translate(Vec3(0, 5, 0));
   // light_source->set_power(500);
 
-  init_cube1(c);
+  init_cube_top(c);
+  init_cube_bottom(c);
+  init_cube_left(c);
+  init_cube_right(c);
+  init_cube_back(c);
   init_cube2(c);
-  init_model(c);
+  // init_model(c);
 }
 
 static void draw(GlContext *c) {
   GetWorld()->Render(c);
   rotate_point_light();
+  // rotate_spot_light();
 }
 
 static void release_resource(GlContext *c) {
@@ -230,6 +330,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_SAMPLES, 4);
 
   GLFWwindow *window =
       glfwCreateWindow(screen_width, screen_height, "OpenGL Demo", NULL, NULL);
@@ -253,6 +354,7 @@ int main() {
   // init_texture(context);
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_MULTISAMPLE);
 
   // glEnable(GL_BLEND);
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

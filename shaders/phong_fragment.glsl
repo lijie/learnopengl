@@ -63,7 +63,6 @@ void main()
 
 #if DIRECTION_LIGHT_NUM > 0
     DirectionalLight directionalLight;
-
     directionalLight = directionalLights[ 0 ];
     getDirectionalDirectLightIrradiance(directionalLight, geometry, directLight);
     RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
@@ -76,14 +75,21 @@ void main()
     RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
 #endif
 
+#if SPOT_LIGHT_NUM > 0
+    SpotLight spotLight;
+    spotLight = spotLights[0];
+    // void getSpotDirectLightIrradiance(const in SpotLight spotLight, const in GeometricContext geometry, out IncidentLight directLight) {
+    getSpotDirectLightIrradiance(spotLight, geometry, directLight);
+    RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
+#endif
+
     vec3 irradiance = getAmbientLightIrradiance(uAmbientLight);
     ReflectIndirectBlinnPhong(irradiance, geometry, material, reflectedLight);
 
     vec3 outLight = reflectedLight.directDiffuse + reflectedLight.directSpecular + reflectedLight.indirectDiffuse;
-
+    //testColor = reflectedLight.directDiffuse;
     FragColor = vec4(outLight, diffuseColor.a);
     // FragColor = vec4(reflectedLight.directSpecular, diffuseColor.a);
     // testColor = normal;
-    // FragColor = vec4(testColor, diffuseColor.a);
     FragColor = LinearTosRGB(FragColor);
 }

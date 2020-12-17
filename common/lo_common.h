@@ -36,12 +36,14 @@ class Texture;
 class Shader;
 class Renderer;
 class Light;
+class Shape;
 
 typedef std::shared_ptr<Material> MaterialPtr;
 typedef std::shared_ptr<Texture> TexturePtr;
 typedef std::shared_ptr<Shader> ShaderPtr;
 typedef std::shared_ptr<Renderer> RendererPtr;
 typedef std::shared_ptr<Light> LightPtr;
+typedef std::shared_ptr<Shape> ShapePtr;
 
 #define COLOR_WHITE Vec3(1.0f, 1.0f, 1.0f)
 #define COLOR_BLACK Vec3(0.0f, 0.0f, 0.0f)

@@ -111,10 +111,14 @@ class Shape : public Renderer {
   std::function<void(void)> after_render_func_ = nullptr;
 };
 
+typedef std::shared_ptr<Shape> ShapePtr;
+
 class Cube : public Shape {
  public:
   Cube();
 };
+
+typedef std::shared_ptr<Cube> CubePtr;
 
 class Plane : public Shape {
  public:

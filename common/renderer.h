@@ -1,6 +1,7 @@
 #ifndef __LEARNOPENGL_RENDERER_H__
 #define __LEARNOPENGL_RENDERER_H__
 
+#include <string>
 #include <memory>
 #include "transform.h"
 
@@ -12,22 +13,25 @@ class Renderer : public Transform {
   // submit data to GPU
   // .. set vao, vbo, ebo and so on...
   // .. set shader uniform values
-  virtual void Submit(MaterialPtr mat) = 0;
+  virtual void Submit(MaterialPtr mat) {};
 
   // do render
   // glDrawXXXX
-  virtual void Render(MaterialPtr mat) = 0;
+  virtual void Render(MaterialPtr mat) {};
 
   // after render, clean data if necessary
   virtual void Cleanup() {}
 
+  virtual void BeforeUpdate() {}
+  virtual void AfterUpdate() {}
+
   // update per frame
   void Update(MaterialPtr material) {
-    // auto mat = material == nullptr ? material_ : material;
-    // printf("render %s\n", display_name_.c_str());
+    BeforeUpdate();
     Submit(material);
     Render(material);
     Cleanup();
+    AfterUpdate();
   }
 
   void set_proority(int v) { priority_ = v; }
@@ -45,6 +49,7 @@ class Renderer : public Transform {
  protected:
   int priority_ = 0;
   bool visible_ = true;
+  bool need_submit_ = true;
   std::shared_ptr<Material> material_ = nullptr;
   std::string display_name_ = "";
 
