@@ -28,7 +28,9 @@ material_t Material::FindMaterial(const std::string& name) {
 static std::map<std::string, texture_t> TextureCollections;
 
 Texture::~Texture() {
-  glDeleteTextures(1, (const GLuint*)&texture_id);
+  if (!external_tex) {
+    glDeleteTextures(1, (const GLuint*)&texture_id);
+  }
 }
 
 void Texture::SetupTexture() {
@@ -96,6 +98,7 @@ texture_t Texture::NewTexture(const std::string& path, TextureType type) {
 std::shared_ptr<Texture> Texture::NewTextureWithTextureId(int tex_id) {
   texture_t tex = std::make_shared<Texture>();
   tex->texture_id = tex_id;
+  tex->external_tex = true;
   fprintf(stdout, "Texutre: Generate texture with id %d\n", tex->texture_id);
   return tex;
 }
@@ -117,6 +120,11 @@ static void UpdateShaderProperty(shared_ptr<Shader> shader,
     auto raw_value = std::any_cast<float>(value);
     loc = shader->GetUniformLocation(name.c_str());
     if (loc >= 0) glUniform1f(loc, raw_value);
+    CHECK_GL_ERROR;
+  } else if (value.type() == typeid(glm::vec2)) {
+    auto raw_value = std::any_cast<glm::vec2>(value);
+    loc = shader->GetUniformLocation(name.c_str());
+    if (loc >= 0) glUniform3fv(loc, 1, glm::value_ptr(raw_value));
     CHECK_GL_ERROR;
   } else if (value.type() == typeid(glm::vec3)) {
     auto raw_value = std::any_cast<glm::vec3>(value);

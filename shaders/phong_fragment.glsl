@@ -22,7 +22,30 @@ out vec4 FragColor;
 
 vec3 testColor;
 
+#include chunks/pack.glsl
 #include chunks/light_define.glsl
+#include chunks/shadow_define.glsl
+
+#if SPOT_SHADOW_NUM > 0
+in vec4 vSpotShadowCoord[SPOT_SHADOW_NUM];
+#endif
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(spotShadowMap[0], projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+
+    return shadow;
+}
+
 
 void main()
 {
@@ -80,16 +103,25 @@ void main()
     spotLight = spotLights[0];
     // void getSpotDirectLightIrradiance(const in SpotLight spotLight, const in GeometricContext geometry, out IncidentLight directLight) {
     getSpotDirectLightIrradiance(spotLight, geometry, directLight);
-    RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
+#if SPOT_SHADOW_NUM > 0
+    // SpotLightShadow spotLightShadow = spotLightShadows[0];
+    // float shadow = all(bvec2(directLight.visible, true)) ? getShadow(spotShadowMap[0], spotLightShadow.shadowMapSize, spotLightShadow.shadowBias, spotLightShadow.shadowRadius, vSpotShadowCoord[0]) : 1.0;
+    // directLight.color *= shadow;
+    // // float z1 = vSpotShadowCoord[0].z / vSpotShadowCoord[0].w;
+    // float z1 = pow(shadow, 256);
+    // testColor = vec3(shadow);
+    float shadow = ShadowCalculation(vSpotShadowCoord[0]);
+    testColor = vec3(shadow);
+    directLight.color *= (1 - shadow);
 #endif
+#endif
+    RreflectDirectBlinnPhong(directLight, geometry, material, reflectedLight);
 
     vec3 irradiance = getAmbientLightIrradiance(uAmbientLight);
     ReflectIndirectBlinnPhong(irradiance, geometry, material, reflectedLight);
 
     vec3 outLight = reflectedLight.directDiffuse + reflectedLight.directSpecular + reflectedLight.indirectDiffuse;
-    //testColor = reflectedLight.directDiffuse;
     FragColor = vec4(outLight, diffuseColor.a);
-    // FragColor = vec4(reflectedLight.directSpecular, diffuseColor.a);
-    // testColor = normal;
     FragColor = LinearTosRGB(FragColor);
+    // FragColor = vec4(testColor, 1.0);
 }

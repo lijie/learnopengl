@@ -48,6 +48,7 @@ class Texture {
   int height = 0;
   uint8_t* data = nullptr;
   bool is_cube_map = false;
+  bool external_tex = false;
 
   void SetupTexture();
   void Unbind();

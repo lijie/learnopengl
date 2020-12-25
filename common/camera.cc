@@ -17,7 +17,9 @@ Camera::Camera(const Vec3& pos, const Vec3& up, const Vec3& target, double fov,
 }
 
 Mat4 Camera::GetViewMatrix() {
-  return glm::lookAt(position_, position_ + front_, up_);
+  // return glm::lookAt(position_, position_ + front_, up_);
+  // printf("GetViewMatrix %s\n%s\n", glm::to_string(position_).c_str(), glm::to_string(position_ + front_).c_str());
+  return glm::lookAt(position_, position_ + front_, world_up_);
 }
 
 Mat4 Camera::GetProjectionMatrix() {
@@ -26,6 +28,11 @@ Mat4 Camera::GetProjectionMatrix() {
 
 void Camera::set_position(const Vec3& pos) {
   position_ = pos;
+  UpdateVectors();
+}
+
+void Camera::set_target(const Vec3& target) {
+  look_target_ = target;
   UpdateVectors();
 }
 

@@ -107,34 +107,71 @@ class Framebuffer {
 #endif
 };
 
-class TextureFramebuffer : Framebuffer {
+class TextureFramebuffer : public Framebuffer {
  public:
   TextureFramebuffer(int width, int height) : Framebuffer(width, height) {}
 
   ~TextureFramebuffer() {
+    printf("delete renderbuffer[%d], texutrebuffer[%d], framebuffer[%d]\n", render_buffer_id_, texture_buffer_id_, framebuffer_id_);
     glDeleteBuffers(1, &render_buffer_id_);
+    CHECK_GL_ERROR;
     glDeleteBuffers(1, &texture_buffer_id_);
+    CHECK_GL_ERROR;
     glDeleteBuffers(1, &framebuffer_id_);
+    CHECK_GL_ERROR;
   }
 
   void Init() override {
     glGenFramebuffers(1, &framebuffer_id_);
+    CHECK_GL_ERROR;
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id_);
+    CHECK_GL_ERROR;
     glGenTextures(1, &texture_buffer_id_);
+    CHECK_GL_ERROR;
     glBindTexture(GL_TEXTURE_2D, texture_buffer_id_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_, 0, GL_RGB,
+    CHECK_GL_ERROR;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width_, height_, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, NULL);
+    CHECK_GL_ERROR;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CHECK_GL_ERROR;
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                            texture_buffer_id_, 0);
+    CHECK_GL_ERROR;
 
     glGenRenderbuffers(1, &render_buffer_id_);
+    CHECK_GL_ERROR;
     glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_id_);
+    CHECK_GL_ERROR;
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width_, height_);
+    CHECK_GL_ERROR;
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                               GL_RENDERBUFFER, render_buffer_id_);
+    CHECK_GL_ERROR;
   }
+
+  void Enable() override {
+    int save_id;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &save_id);
+    CHECK_GL_ERROR;
+    if (GetFramebufferId() < 0) {
+      Init();
+      if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        fprintf(stderr, "ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+      }
+    }
+    // printf("bind framebuffer: %d\n", GetFramebufferId());
+    glBindFramebuffer(GL_FRAMEBUFFER, GetFramebufferId());
+    CHECK_GL_ERROR;
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_buffer_id_, 0);
+    CHECK_GL_ERROR;
+    last_framebuffer_id_ = save_id;
+  }
+
+  int GetTextureId() override { return texture_buffer_id_; }
+  int GetFramebufferId() override { return framebuffer_id_; }
 
   private:
     unsigned int framebuffer_id_, texture_buffer_id_, render_buffer_id_;
@@ -197,6 +234,8 @@ void Init() override {
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_buffer_id_, 0);
     CHECK_GL_ERROR;
     glDrawBuffer(GL_NONE);
+    CHECK_GL_ERROR;
+    glReadBuffer(GL_NONE);
     CHECK_GL_ERROR;
     // glReadBuffer(GL_NONE);
 

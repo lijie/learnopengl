@@ -103,7 +103,6 @@ void RreflectDirectBlinnPhong(
     // testColor = material.diffuseColor.rgb;
     reflectedLight.directDiffuse +=
         irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
-    testColor = reflectedLight.directDiffuse;
     reflectedLight.directSpecular += 
         irradiance * BRDF_Specular_BlinnPhong(directLight, geometry, material.specularColor, material.specularShininess) * material.specularStrength;
 }

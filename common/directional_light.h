@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include "lo_common.h"
 #include "transform.h"
@@ -16,26 +17,56 @@ enum LightType {
 };
 
 struct SceneCommonUniforms;
+struct RenderContext;
+
+struct ShadowParams {
+  Vec2 Resolution;
+};
+
+struct ShadowMapData {
+  FramebufferPtr DepthMapBuffer;
+};
 
 class Light {
  public:
   Light(LightType type) : light_type_(type) {}
-  virtual void SetUniforms(std::shared_ptr<Material> mat,
+  virtual void SetUniforms(const RenderContext& ctx, std::shared_ptr<Material> mat,
                            const SceneCommonUniforms& common_uniforms){};
 
   Transform* GetTransform() { return &transform_; }
   LightType light_type() { return light_type_; }
   int index() { return index_; }
   void set_index(int v) { index_ = v; }
+  int shadow_index() { return shadow_index_; }
+  void set_shadow_index(int v) { shadow_index_ = v; }
   const Vec3& color() { return color_; }
   void set_color(const Vec3& color) { color_ = color; }
 
+  // virtual void PrepareShadowMapData(const ShadowParams& params, ShadowMapData *data) {};
+
+  void EanbleShadow(const ShadowParams& params) {
+    enable_shadow_ = true;
+    shadow_params_ = params;
+    // PrepareShadowMapData(shadow_params_, &shadow_map_data_);
+  }
+  void DisableShadow() {
+    enable_shadow_ = false;
+  }
+  bool IsShadowEnabled() { return enable_shadow_; }
+  virtual RenderContext *GetDepthMapContext(RenderPass pass) { return nullptr; }
+  
  protected:
   Transform transform_;
   LightType light_type_;
+  ShadowParams shadow_params_;
+  ShadowMapData shadow_map_data_;
   float intensity_ = 1.0f;
   Vec3 color_;
   int index_ = 0;
+  int shadow_index_ = 0;
+  bool enable_shadow_ = false;
+
+  RenderContext *AllocAndInitDepthMapContext();
 };
 
 class DirectionalLight : public Light {
@@ -52,7 +83,7 @@ class DirectionalLight : public Light {
   Vec3 direction() { return target_ - transform_.position(); }
   const Vec3& color() { return color_; }
 
-  void SetUniforms(MaterialPtr mat,
+  void SetUniforms(const RenderContext& ctx, MaterialPtr mat,
                    const SceneCommonUniforms& common_uniforms) override;
 
  private:
@@ -67,7 +98,7 @@ class PointLight : public Light {
     set_color(color);
   }
 
-  void SetUniforms(MaterialPtr mat,
+  void SetUniforms(const RenderContext& ctx, MaterialPtr mat,
                    const SceneCommonUniforms& common_uniforms) override;
 
  private:
@@ -83,7 +114,7 @@ class AmbientLight : public Light {
   AmbientLight(const Vec3& color) : Light(kAmbientLight), color_(color) {}
   const Vec3& color() { return color_; }
 
-  void SetUniforms(MaterialPtr mat,
+  void SetUniforms(const RenderContext& ctx, MaterialPtr mat,
                    const SceneCommonUniforms& common_uniforms) override;
 
  private:
@@ -92,8 +123,13 @@ class AmbientLight : public Light {
 
 class SpotLight : public Light {
  public:
-  SpotLight(float distance, float decay, const Vec3& color, float cone = glm::pi<float>() / 6.0f, float penumbra = 0.0f)
-      : Light(kSpotLight), distance_(distance), decay_(decay), cone_(cone), penumbra_(penumbra) {
+  SpotLight(float distance, float decay, const Vec3& color,
+            float cone = glm::pi<float>() / 6.0f, float penumbra = 0.0f)
+      : Light(kSpotLight),
+        distance_(distance),
+        decay_(decay),
+        cone_(cone),
+        penumbra_(penumbra) {
     set_color(color);
   }
 
@@ -103,15 +139,19 @@ class SpotLight : public Light {
   Vec3 direction() { return target_ - transform_.position(); }
   const Vec3& color() { return color_; }
 
-  void SetUniforms(MaterialPtr mat,
+  void SetUniforms(const RenderContext& ctx, MaterialPtr mat,
                    const SceneCommonUniforms& common_uniforms) override;
+
+  RenderContext *GetDepthMapContext(RenderPass pass) override;
 
  private:
   Vec3 target_;
+  RenderContext *depthmap_ctx_ = nullptr;
   float distance_ = 0.0f;
   float decay_ = 1.0f;
-  float cone_ = glm::pi<float>() / 6.0f; // 本影, 角度(弧度)
-  float penumbra_ = 0.0f;         // 半影, [0, 1], 所占本影区域的百分比
+  float cone_ = glm::pi<float>() / 6.0f;  // 本影, 角度(弧度)
+  float penumbra_ = 0.0f;  // 半影, [0, 1], 所占本影区域的百分比
+  Mat4 light_space_mat_;
 };
 
 typedef std::shared_ptr<SpotLight> SpotLightPtr;
@@ -129,12 +169,17 @@ class LightHelper : public Renderer {
 class LightManager {
  public:
   void AddLight(LightPtr light);
-  void SetUniforms(MaterialPtr mat, const SceneCommonUniforms& common_uniforms);
+  void SetUniforms(const RenderContext& ctx, MaterialPtr mat, const SceneCommonUniforms& common_uniforms);
+
+  void ForEachLight(std::function<void(LightPtr)> cb);
 
  private:
   int directional_light_index_ = 0;
+  int directional_shadow_index_ = 0;
   int point_light_index_ = 0;
+  int point_shadow_index_ = 0;
   int spot_light_index_ = 0;
+  int spot_shadow_index_ = 0;
 
   std::vector<LightPtr> light_vec_;
 };

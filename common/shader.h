@@ -32,9 +32,9 @@ class Shader {
   
   template<typename T>
   int SetUniformValues(const char *name, T v1, T v2, T v3, T v4) {
-    int location = GetUniformLocation(name);          
-    if (location < 0)                                               
-      return -1;                                                        
+    int location = GetUniformLocation(name);
+    if (location < 0)
+      return -1;
     glUniform4f(location, v1, v2, v3, v4);
     return 0;
   }

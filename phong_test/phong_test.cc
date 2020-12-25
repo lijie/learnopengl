@@ -214,7 +214,8 @@ static void init_cube2(GlContext *c) {
   mat->SetParams(params);
 
   cube->set_material(mat);
-  cube->Translate(Vec3(-4.0f, 0.0f, 0.0f));
+  cube->Translate(Vec3(-4.0f, 0.0f, 4.0f));
+  cube->Scale(Vec3(2.0, 2.0, 2.0));
   GetWorld()->AddRenderer(cube);
   GetWorld()->SetTestShape(cube);
   cube->set_display_name("cube2");
@@ -265,14 +266,17 @@ static void rotate_spot_light() {
 static void init_scene(GlContext *c) {
   stbi_set_flip_vertically_on_load(1);
 
+  Vec2 resolution(screen_width, screen_height);
+  GetWorld()->SetResolution(resolution);
+
   Camera *camera = new Camera(Vec3(0.0, 0.0, 35.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
                               (double)screen_width / screen_height);
   GetWorld()->AddCamera(camera);
 
-  // auto directional_light =
-  //     NewSharedObject<DirectionalLight>(Vec3(0.0f, 0.0f, 0.0f), COLOR_WHITE);
-  // directional_light->GetTransform()->set_position(Vec3(-5.0f, 5.0f, 0.0f));
-  // GetWorld()->AddLight(directional_light);
+  auto directional_light =
+      NewSharedObject<DirectionalLight>(Vec3(0.0f, 0.0f, 0.0f), COLOR_WHITE);
+  directional_light->GetTransform()->set_position(Vec3(-5.0f, 5.0f, 0.0f));
+  GetWorld()->AddLight(directional_light);
 
   auto ambient_light = NewSharedObject<AmbientLight>(Vec3(0.133, 0.133, 0.133));
   GetWorld()->AddLight(ambient_light);
@@ -282,34 +286,28 @@ static void init_scene(GlContext *c) {
   // GetWorld()->AddLight(point_light);
   // rotated_point_light = point_light;
 
-  auto spot_light = NewSharedObject<SpotLight>(0, 0, COLOR_WHITE);
-  spot_light->GetTransform()->set_position(Vec3(0.0f, 7.0f, 0.0f));
+  auto spot_light = NewSharedObject<SpotLight>(0, 0, COLOR_WHITE, glm::pi<float>() / 6.0f, 0.5);
+  spot_light->GetTransform()->set_position(Vec3(0.0f, 15.0f, 0.0f));
 
   spot_light->set_target(Vec3(0.0f, 0.0f, 0.0f));
+
+  ShadowParams shadow_params;
+  shadow_params.Resolution = Vec2(1024.0f, 1024.0f);
+  spot_light->EanbleShadow(shadow_params);
 
   GetWorld()->AddLight(spot_light);
   rotated_spot_light = spot_light;
 
-  auto spot_light_helper = NewSharedObject<LightHelper>(spot_light);
-  GetWorld()->AddRenderer(spot_light_helper);
+  // auto spot_light_helper = NewSharedObject<LightHelper>(spot_light);
+  // GetWorld()->AddRenderer(spot_light_helper);
 
-  // camera->set_position(point_light->GetTransform()->position());
-
-  // auto light_source = std::make_shared<LightSource>();
-  // GetWorld()->AddLightSource(light_source);
-
-  // light_source_model = glm::translate(light_source_model, Vec3(20, 20, 10));
-  // light_source->set_model(light_source_model);
-  // light_source->Translate(Vec3(0, 5, 0));
-  // light_source->set_power(500);
-
-  init_cube_top(c);
+  // init_cube_top(c);
   init_cube_bottom(c);
   init_cube_left(c);
   init_cube_right(c);
   init_cube_back(c);
   init_cube2(c);
-  // init_model(c);
+  init_model(c);
 }
 
 static void draw(GlContext *c) {
@@ -342,7 +340,6 @@ int main() {
 
   gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-  glViewport(0, 0, screen_width, screen_height);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -368,7 +365,7 @@ int main() {
     process_input(window);
 
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     draw(context);
 

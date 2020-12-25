@@ -24,6 +24,9 @@ class Scene {
   void AddCamera(Camera *c) { camera_ = c; }
   Camera *GetCamera() { return camera_; }
 
+  void SetResolution(const Vec2& size);
+  void RestoreResolution();
+
   void AddRenderer(std::shared_ptr<Renderer> r, int pri = 0);
   // void AddLightSource(std::shared_ptr<LightSource> ls) {
   //   light_source_ = ls;
@@ -51,6 +54,8 @@ class Scene {
  private:
   Camera *camera_ = nullptr;
   LightManager *light_manager_ = nullptr;
+  Vec2 resolution_;
+  Vec2 current_resolution_;
 
   std::list<std::shared_ptr<Renderer>> renderer_list_;
   // std::shared_ptr<LightSource> light_source_;
@@ -64,11 +69,18 @@ class Scene {
 
   std::shared_ptr<Shape> test_shape_ = nullptr;
 
+  RenderContext *default_context_ = nullptr;
+  RenderContext *depthmap_context_ = nullptr;
+
   void SortRenderer();
   void UpdateMaterialProperties(RendererPtr renderer, MaterialPtr material, const RenderContext& context);
   void ShadowDepthMapPass();
+  void RenderDepthMapForAllLights();
+  void RenderSceneWithContext(RenderContext *context);
   void DrawPass();
   void Draw(RenderContext *context);
+  RenderContext* InitDefaultContext();
+  RenderContext* InitDepthMapContext();
 };
 
 #endif  // #define  __LEARNOPENGL_COMMON_SCENE_H__

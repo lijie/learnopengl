@@ -21,9 +21,69 @@ class RendererCompare {
   }
 };
 
-Scene::Scene() { light_manager_ = new LightManager; }
+Scene::Scene() {
+  light_manager_ = new LightManager;
+  resolution_ = Vec2(0.0f, 0.0f);
+  current_resolution_ = resolution_;
+  
+}
 
-Scene::~Scene() { delete light_manager_; }
+Scene::~Scene() {
+  if (default_context_ != nullptr) delete default_context_;
+  if (depthmap_context_ != nullptr) delete depthmap_context_;
+  delete light_manager_;
+}
+
+RenderContext* Scene::InitDefaultContext() {
+  if (default_context_ != nullptr) return default_context_;
+  auto ctx = new RenderContext;
+  // ctx->Camera = camera_;
+  ctx->Pass = kRenderPassDraw;
+  ctx->ContextMaterial = nullptr;
+  ctx->OutputFramebuffer = nullptr;
+  ctx->EnableLight = true;
+  ctx->EnableShadow = true;
+  ctx->GLEnableFlags.push_back(GL_DEPTH_TEST);
+  ctx->GLEnableFlags.push_back(GL_MULTISAMPLE);
+  ctx->GLClearFlags =
+      GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+  ctx->Resolution = resolution_;
+  default_context_ = ctx;
+  return ctx;
+}
+
+RenderContext* Scene::InitDepthMapContext() {
+  if (depthmap_context_ != nullptr) return depthmap_context_;
+  Vec2 size = Vec2(1024, 1024);
+  auto ctx = new RenderContext;
+  // ctx->Camera = camera_;
+  ctx->Pass = kRenderPassDepthMap;
+  ctx->ContextMaterial = NewSharedObject<DepthMapMaterial>();
+  ctx->OutputFramebuffer = NewSharedObject<TextureFramebuffer>(size.x, size.y);
+  ctx->EnableLight = false;
+  ctx->EnableShadow = false;
+  ctx->GLEnableFlags.push_back(GL_DEPTH_TEST);
+  ctx->GLClearFlags =
+      GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+  ctx->Resolution = size;
+  depthmap_context_ = ctx;
+  return ctx;
+}
+
+void Scene::SetResolution(const Vec2& size) {
+  if (resolution_.x == 0.0f && resolution_.y == 0.0f) {
+    resolution_ = size;
+    current_resolution_ = resolution_;
+  } else {
+    current_resolution_ = size;
+  }
+  glViewport(0, 0, size.x, size.y);
+}
+
+void Scene::RestoreResolution() {
+  current_resolution_ = resolution_;
+  glViewport(0, 0, current_resolution_.x, current_resolution_.y);
+}
 
 void Scene::SortRenderer() {
   RendererCompare cmp;
@@ -74,9 +134,11 @@ void Scene::UpdateMaterialProperties(RendererPtr renderer,
   material->SetProperty("uModelView", model_view);
   material->SetProperty("uNormalMatrix", normal_matrix);
 
+  // printf("0 at CameraSpace: %s\n", glm::to_string(projection * view * Vec4(0, 0, 0, 1.0)).c_str());
+
   // set light uniforms
   if (context.EnableLight) {
-    light_manager_->SetUniforms(material, context.CommonUniforms);
+    light_manager_->SetUniforms(context, material, context.CommonUniforms);
   }
 
   // material->DefineValue("DIRECTION_LIGHT_NUM", 1);
@@ -102,7 +164,66 @@ void Scene::UpdateMaterialProperties(RendererPtr renderer,
   material->SetProperty("camera_position", camera_position);
 }
 
-void Scene::ShadowDepthMapPass() {
+#if 0
+void Scene::RenderDepthMapForAllLights() {
+  auto save_camera = GetCamera();
+  auto depth_camera =
+      new Camera(Vec3(0.0, 0.0, 35.0), Vec3(0, 1, 0), Vec3(0, 0, 0), 45.0,
+                 resolution_.x / resolution_.y);
+  AddCamera(depth_camera);
+
+  auto render_cb = [this](LightPtr light) {
+    if (!light->IsShadowEnabled()) return;
+    const ShadowParams& params = light->GetShadowParams();
+    auto output = light->GetShadowMapOutputFramebuffer();
+    if (output == nullptr) return;
+    // update camera
+    GetCamera()->set_position(light->GetTransform()->position());
+    GetCamera()->set_target();
+    this->RenderDepthMap(params.Resolution, output);
+  };
+
+  light_manager_->ForEachLight(render_cb);
+}
+#endif
+
+void Scene::RenderSceneWithContext(RenderContext *context) {
+  // auto save_camera = GetCamera();
+  // if (save_camera != context->Camera) {
+  //   AddCamera(context->Camera);
+  // }
+
+  if (context->Resolution != resolution_) {
+    SetResolution(context->Resolution);
+  }
+
+  if (context->OutputFramebuffer != nullptr) {
+    context->OutputFramebuffer->Enable();
+  }
+
+  glClear(context->GLClearFlags);
+  // TODO(): 不是每次渲染都需要
+  for (auto i = 0; i < context->GLEnableFlags.size(); i++) {
+    glEnable(context->GLEnableFlags[i]);
+  }
+
+  Draw(context);
+
+  if (context->OutputFramebuffer != nullptr) {
+    context->OutputFramebuffer->Disable();
+  }
+
+  RestoreResolution();
+
+  // restore camera
+  // if (save_camera != GetCamera()) {
+  //   AddCamera(save_camera);
+  // }
+}
+
+#if 0
+// render current scene depth map to output buffer
+void RenderDepthMap(const Vec2& size, FramebufferPtr output) {
   RenderContext context;
   SceneCommonUniforms& common_unifroms = context.CommonUniforms;
 
@@ -112,43 +233,59 @@ void Scene::ShadowDepthMapPass() {
   context.EnableLight = false;
   context.EnableShadow = false;
 
-  if (depth_framebuffer_ == nullptr) {
-    depth_framebuffer_ = NewSharedObject<DepthFramebuffer>(1024, 1024);
-  }
   if (depthmap_material_ == nullptr) {
     depthmap_material_ = NewSharedObject<DepthMapMaterial>();
   }
-  context.ShadowPassOutputFramebuffer = depth_framebuffer_;
   context.ContextMaterial = depthmap_material_;
 
-  glViewport(0, 0, 1024, 1024);
-  context.ShadowPassOutputFramebuffer->Enable();
+  glViewport(0, 0, size.x, size.y);
+  output->Enable();
   // TODO...
   glEnable(GL_DEPTH_TEST);
   glClear(GL_DEPTH_BUFFER_BIT);
 
   Draw(&context);
-  context.ShadowPassOutputFramebuffer->Disable();
-  glViewport(0, 0, 1600, 1200);
+  output->Disable();
+  glViewport(0, 0, resolution_.x, resolution_.y);
+}
+#endif
+
+void Scene::ShadowDepthMapPass() {
+#if 0
+  auto ctx = InitDepthMapContext();
+  ctx->CommonUniforms.ViewMatrix = GetCamera()->GetViewMatrix();
+  ctx->CommonUniforms.ProjectionMatrix = GetCamera()->GetProjectionMatrix();
+  RenderSceneWithContext(ctx);
 
   if (!test_shape_->material()->HasProperty("uDiffuseTexture")) {
-    auto test_texture = Texture::NewTextureWithTextureId(context.ShadowPassOutputFramebuffer->GetTextureId());
+    auto test_texture = Texture::NewTextureWithTextureId(depthmap_context_->OutputFramebuffer->GetTextureId());
     test_shape_->material()->SetDiffuseTexture(test_texture);
     test_shape_->material()->DefineValue("DEPTH_TEXTURE", 1);
   }
+#else
+  auto render_cb = [this](LightPtr light) {
+    if (!light->IsShadowEnabled()) return;
+    auto ctx = light->GetDepthMapContext(kRenderPassDepthMap);
+    // ctx->CommonUniforms.ViewMatrix = GetCamera()->GetViewMatrix();
+    // ctx->CommonUniforms.ProjectionMatrix = GetCamera()->GetProjectionMatrix();
+    this->RenderSceneWithContext(ctx);
+
+    if (!test_shape_->material()->HasProperty("uDiffuseTexture")) {
+      auto test_texture = Texture::NewTextureWithTextureId(ctx->OutputFramebuffer->GetTextureId());
+      test_shape_->material()->SetDiffuseTexture(test_texture);
+      test_shape_->material()->DefineValue("USE_DEPTH_TEXTURE", 1);
+    }
+  };
+
+  light_manager_->ForEachLight(render_cb);
+#endif
 }
 
 void Scene::DrawPass() {
-  RenderContext context;
-  SceneCommonUniforms& common_unifroms = context.CommonUniforms;
-  context.EnableLight = true;
-  context.EnableShadow = true;
-  context.ContextMaterial = nullptr;
-
-  common_unifroms.ViewMatrix = GetCamera()->GetViewMatrix();
-  common_unifroms.ProjectionMatrix = GetCamera()->GetProjectionMatrix();
-
-  Draw(&context);
+  auto ctx = InitDefaultContext();
+  ctx->CommonUniforms.ViewMatrix = GetCamera()->GetViewMatrix();
+  ctx->CommonUniforms.ProjectionMatrix = GetCamera()->GetProjectionMatrix();
+  RenderSceneWithContext(ctx);
 }
 
 void Scene::Draw(RenderContext* context) {
