@@ -5,16 +5,6 @@
 #include <assert.h>
 #include "shader.h"
 
-static const char * vertex_shader_source = "#version 330 core\n"
-	"layout (location = 0) in vec3 a_pos;\n"
-	"void main()\n"
-	"{ gl_Position = vec4(a_pos.x, a_pos.y, a_pos.z, 1.0); }";
-
-static const char * fragment_shader_source = "#version 330 core\n"
-	"out vec4 fragment_color;\n"
-	"void main()\n"
-	"{ fragment_color = vec4(1.0f, 0.5f, 0.2f, 1.0f); }";
-
 static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -89,7 +79,8 @@ static void prepare_triangle_data(uint32_t *vao_out)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-        auto *shader = new Shader(vertex_shader_source, fragment_shader_source);
+        auto *shader = new Shader();
+		shader->Open("00-hello_window/00-vs.glsl", "00-hello_window/00-fs.glsl");
         shader->CompileAndLink();
 	shader->Use();
 	*vao_out = vao;
@@ -140,7 +131,8 @@ static void prepare_rectangle_data(uint32_t *vao_out)
 	glBindVertexArray(0);
 
 	// struct shader *shader = shader_create_with_source(vertex_shader_source, fragment_shader_source);
-        auto shader = new Shader(vertex_shader_source, fragment_shader_source);
+        auto shader = new Shader();
+		shader->Open("00-hello_window/00-vs.glsl", "00-hello_window/00-fs.glsl");
         shader->CompileAndLink();
         shader->Use();
 	// shader_use(shader);

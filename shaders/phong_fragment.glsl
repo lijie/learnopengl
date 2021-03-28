@@ -32,6 +32,7 @@ in vec4 vSpotShadowCoord[SPOT_SHADOW_NUM];
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
+    float shoadowBias = 0.001;
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     // transform to [0,1] range
@@ -41,7 +42,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    float shadow = currentDepth > (closestDepth + shoadowBias)  ? 1.0 : 0.0;
 
     return shadow;
 }
